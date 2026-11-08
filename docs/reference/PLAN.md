@@ -21,7 +21,7 @@ The game follows the original Flockade rules as documented on the Cult of the La
 These hold for the whole project. Each has a reason so you can apply it to cases not listed.
 
 - **Original branding.** The product name, domain, piece names, blessing names, illustrations, sounds and texts are ours, because names and art are protected even though mechanics are not. The words "Flockade" and "Cult of the Lamb" appear only in factual descriptive sentences on content pages (see §7), with a visible "not affiliated with Massive Monster or Devolver Digital" line.
-- **No account, pseudonymous identity.** Each browser gets an anonymous identifier on first visit, kept in the browser (localStorage and, once a server exists, a long-lived cookie set by the server, because Safari can evict localStorage after 7 days without a visit). No email, no password, no third-party login. Accounts may come later (§11, step 7), so game history must be attached to that identifier in a way that lets several identifiers be merged into one account without rewriting history.
+- **No account, pseudonymous identity.** Each browser gets an anonymous identifier on first visit, kept in the browser (localStorage and, once a server exists, a long-lived cookie set by the server, because Safari can evict localStorage after 7 days without a visit). No email, no password, no third-party login. Accounts may come later (§11, step 7), so game history must be attached to that identifier in a way that lets several identifiers be merged into one account without rewriting history. The server also accepts the identifier as a token carried in the protocol, not only as a cookie, so that wrapped apps (§11, step 8), which run from another origin, can play.
 - **Fair online play.** In multiplayer the server decides: random draws happen server-side and a client cannot alter the game state on its own. Every game can be replayed from a recorded seed.
 - **Pieces are distinguishable by shape, not only colour.** Colour-blind players and small cells on mobile both need this. It also constrains the future illustration brief.
 - **Everything the player sees is a placeholder until decided.** No name has been chosen: not the product name, not the pieces, effects or categories (§13). No visual direction has been chosen either: the first release uses simple placeholder shapes, sounds and colours. Both must be trivial to replace later:
@@ -30,7 +30,7 @@ These hold for the whole project. Each has a reason so you can apply it to cases
   - The repository's name is a neutral working name, not the product name; it will be renamed once the product name is chosen (GitHub redirects the old URL). Nothing in the code, the packages or the published pages derives a displayed name from it.
   - Acceptance test, to run at the end of step 1 and again at step 4: rename every piece and the product, and swap all placeholder assets for a dummy second set, in under an hour and without a single code change. If it takes longer, fix the structure before moving on.
 - **Every asset has a licence we can use.** Sounds, fonts, illustrations: CC0, permissive licences, or commissioned. `CREDITS.md` lists each asset with its source and licence.
-- **Public repository, AGPL-3.0.** The code is licensed under the GNU AGPL-3.0, so anyone who runs a modified version online must publish their changes. Everything committed is public from day one: no secrets, tokens or personal data in the repo, the AGPL-3.0 text in `LICENSE` at the root, a `README.md` that explains how to run and contribute, and asset licences compatible with redistribution (a CC-BY sound is fine with attribution in `CREDITS.md`; a "personal use only" asset is not).
+- **Public repository, AGPL-3.0.** The code is licensed under the GNU AGPL-3.0, so anyone who runs a modified version online must publish their changes. Everything committed is public from day one: no secrets, tokens or personal data in the repo, the AGPL-3.0 text in `LICENSE` at the root, a `README.md` that explains how to run and contribute, and asset licences compatible with redistribution (a CC-BY sound is fine with attribution in `CREDITS.md`; a "personal use only" asset is not). Store distribution (§11, step 8) may need an exception to the AGPL-3.0 that only the copyright holders can grant, so who holds the copyright, and whether outside contributions come under a contributor agreement, is decided before `CONTRIBUTING.md` is published.
 - **EU defaults.** The publisher is in France. Privacy notice, "reset my identity" button and a data retention rule exist from the first server deployment, because a persistent identifier is pseudonymous personal data under GDPR.
 
 ## 3. Scope of the rules
@@ -115,6 +115,7 @@ In the localisation step:
 - [ ] Publisher identification page as required by the French LCEN (an individual may name the host instead of themselves; verify current wording).
 - [ ] Terms of use, contact.
 - [ ] `CREDITS.md` complete.
+- [ ] Copyright holder and contributor agreement decided (§2), before `CONTRIBUTING.md` is published and before the first outside contribution.
 - [ ] `LICENSE` (AGPL-3.0), `README.md` and `CONTRIBUTING.md` present; repository description and topics set on GitHub.
 - [ ] Soft launch to friends (after step 2), fix, then public posts (after step 5).
 
@@ -145,6 +146,9 @@ Done when: the game, the tutorial and the content pages exist in English, French
 
 **Step 7: optional accounts**
 Done when: a player can claim their history with a magic link; several browser identities merge under one account; the anonymous path still works unchanged.
+
+**Step 8 (optional): Android app**
+Done when: an Android app (a shell around the web app) is submitted to Google Play; the licensing for the store is settled; solo works offline in the app; the game in the browser is unchanged. iOS and Steam are out of scope.
 
 ## 12. Working conventions for Claude Code sessions
 
