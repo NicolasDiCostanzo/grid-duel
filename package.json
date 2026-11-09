@@ -1,0 +1,31 @@
+{
+  "name": "game-workspace",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "node -e \"console.error('dev is not wired yet (epic 1.10)'); process.exit(1)\"",
+    "test": "vitest run",
+    "simulate": "node -e \"console.error('simulate is not wired yet (epic 1.9)'); process.exit(1)\"",
+    "deploy": "node -e \"console.error('deploy is not wired yet (epic 1.13)'); process.exit(1)\"",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint . && npm run typecheck",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.19.2",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^5.1.0"
+  }
+}
