@@ -48,7 +48,7 @@ The engine package holds the piece catalog as data, a seeded random generator an
 - A seeded PRNG returns the same sequence for the same seed and different sequences for different seeds. It is injected, never global; the engine never calls `Math.random`.
 - Each player starts with a deck of all 36 pieces, shuffled from the seed.
 - An offer is 3 pieces from the player's deck, or 1 when the opponent has a Lone Shepherd in play (here only the offer-size function; placement is 1.3).
-- Picking a piece consumes it. Unpicked offered pieces go back into the deck. A consumed piece is never offered again (see RULES.md).
+- Picking a piece consumes it for the rest of the round. Unpicked offered pieces go back into the deck. A consumed piece is not offered again in the same round. Decks are rebuilt in full at the start of every round (RULES.md), so an offer is always full.
 
 ### Done when
 Table-driven tests with fixtures in dedicated files cover each behaviour, including catalog counts per type and blessing. `npm test` passes.
@@ -165,15 +165,15 @@ Depends on: 1.5 (duels and scoring). Present a plan for this epic and wait for v
 The full game loop, replay from a recorded seed, and confidence that no legal sequence breaks the state.
 
 ### Behaviours (target for tests)
-- A match is won by the first player to win 2 rounds. A drawn round counts as a win for both players. If both reach 2 wins, the match is a tie. A match lasts at most 3 rounds.
-- Boards reset between rounds. Decks persist (consumed pieces stay consumed).
+- A drawn round counts as a win for both players, in every round. After each round the match ends if one player has at least 2 round wins and strictly more than the opponent (RULES.md, "Match winner"). Otherwise another round is played. The number of rounds has no limit.
+- Boards and decks reset between rounds: every round starts with a full 36-piece deck per player.
 - A game is fully described by seed, board size and the list of moves. Replaying them gives the exact same final state and event list.
 - Per-player view function: a player's view never contains the opponent's deck, offers or future draws.
-- Randomised test: random legal move sequences over many seeds, both board sizes, never reach an invalid state (board counts, no duplicated piece, deck consistency, round and match rules). Property-testing library choice recorded in README.md.
+- Randomised test: random legal move sequences over many seeds, both board sizes, never reach an invalid state. The harness stops a game after a fixed number of rounds and checks the state invariants at that point, so an unfinished match is allowed; a separate test checks that repeated drawn rounds keep the match unfinished and the state valid (board counts, no duplicated piece, deck consistency, round and match rules). Property-testing library choice recorded in README.md.
 - A single public engine API (create game, list legal moves, apply move, view) that solo, multiplayer and the bots will all use.
 
 ### Done when
-Table-driven tests cover the match rules (win, loss, draw, total tie), replay equality and the view; the randomised test passes. `npm test` passes.
+Table-driven tests cover the match rules (2-0, 2-1, 1-1 after a draw, 2-2 continuing, a win after several drawn rounds), replay equality and the view; the randomised test passes. `npm test` passes.
 
 ### Out of scope
 Bots, UI, networking.
