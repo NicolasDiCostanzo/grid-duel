@@ -35,7 +35,7 @@ These hold for the whole project. Each has a reason so you can apply it to cases
 
 ## 3. Scope of the rules
 
-- The whole game is implemented at once, in step 1: every rule, every piece and every effect described on the wiki page, with their resolution order. Nothing from the wiki is left for a later step, except two deliberate omissions, each recorded in `RULES.md` as a difference from the original: the Trickster+ Shepherd blessing (marked unused on the wiki) and betting (no accounts, no currency). Both board sizes are implemented from step 1: 2x2 with 4 duels and 2x3 with 6 duels.
+- The whole game is implemented at once, in step 1: every rule, every piece and every effect described on the wiki page, with their resolution order. Nothing from the wiki is left for a later step, except two deliberate omissions and one deliberate change, each recorded in `RULES.md` as a difference from the original: the Trickster+ Shepherd blessing (marked unused on the wiki), betting (no accounts, no currency), and the tied match (play continues until one player has at least 2 round wins and more than the opponent). Both board sizes are implemented from step 1: 2x2 with 4 duels and 2x3 with 6 duels.
 - The plan states no rule; the wiki is the only source. Anything the wiki does not specify (for instance how pieces are weighted when drawn, since the original ties the pool to what a player has unlocked and we have no unlocking) is decided by the simplest reading, tuned by simulation where balance is involved, and recorded in a `RULES.md` file in the repository as an interpretation.
 - Online-play additions that are not game rules: a move timer (30 s default, auto-pass after timeout) and a forfeit after 3 consecutive timeouts or 60 s of disconnection.
 
@@ -124,7 +124,7 @@ In the localisation step:
 Each step has a definition of done. Finish and verify a step before starting the next, unless the user asks otherwise.
 
 **Step 1: engine, bot, solo prototype**
-Done when: the engine implements every rule, piece and effect from the wiki (minus the two omissions in §3), with tests for each effect and their interactions, and a simulation balance report; the three bot levels exist and the simulation tool shows hard > medium > easy; a person can play a full solo match on both board sizes with placeholder visuals, labels that explain each effect, basic placement feel and sound, mute toggle, all text in translation files with English as the only language; the rename-and-reskin acceptance test from §2 passes; deployed and reachable online.
+Done when: the engine implements every rule, piece and effect from the wiki (with the deliberate differences listed in §3), with tests for each effect and their interactions, and a simulation balance report; the three bot levels exist and the simulation tool shows hard > medium > easy; a person can play a full solo match on both board sizes with placeholder visuals, labels that explain each effect, basic placement feel and sound, mute toggle, all text in translation files with English as the only language; the rename-and-reskin acceptance test from §2 passes; deployed and reachable online.
 
 **Step 1b: content pages indexed**
 Done when: home, rules and FAQ exist in English with schema, sitemap and OG image; non-affiliation line present; site registered in Search Console and Bing; privacy notice and identity reset exist.
