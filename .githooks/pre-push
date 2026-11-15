@@ -1,0 +1,7 @@
+#!/bin/sh
+set -e
+[ -z "$(git status --porcelain)" ] ||
+  { echo "Working tree is not clean: commit or stash first so the checks run on what is pushed." >&2; exit 1; }
+npm run format:check
+npm run lint
+npm test
