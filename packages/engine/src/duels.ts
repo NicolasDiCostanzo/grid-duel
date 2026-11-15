@@ -2,6 +2,7 @@ import { compareTypes, getPiece, type Outcome } from './catalog';
 import { sequence, type DuelEvent } from './moves';
 import {
   cellIndex,
+  otherPlayer,
   type Board,
   type Placed,
   type PlayerId,
@@ -16,8 +17,20 @@ export class DuelsError extends Error {
   }
 }
 
+const PRIZE_POINTS = 2;
+const FALSE_POINTS = 2;
+const MARKED_LOSS = 1;
+
+const activeEffect = (placed: Placed): string | null =>
+  placed.nullified ? null : getPiece(placed.pieceId).effect;
+
 const winsTies = (placed: Placed): boolean =>
-  !placed.nullified && getPiece(placed.pieceId).effect === 'tie-win';
+  activeEffect(placed) === 'tie-win';
+
+const hasGolden = (board: Board): boolean =>
+  board.some(
+    (placed) => placed !== null && activeEffect(placed) === 'double-points',
+  );
 
 const placedAt = (board: Board, index: number): Placed => {
   const placed = board[index];
@@ -49,20 +62,40 @@ export function resolveDuels(state: RoundState): {
     throw new DuelsError('not-moved');
   }
   const points: [number, number] = [...state.points];
+  const golden = [hasGolden(state.boards[0]), hasGolden(state.boards[1])];
   const events: DuelEvent[] = [];
   for (const cell of sequence(state.boardSize)) {
     const index = cellIndex(state.boardSize, cell);
-    const winner =
-      WINNERS[
-        duelOutcome(
-          placedAt(state.boards[0], index),
-          placedAt(state.boards[1], index),
-        )
-      ];
+    const pieces = [
+      placedAt(state.boards[0], index),
+      placedAt(state.boards[1], index),
+    ] as const;
+    const winner = WINNERS[duelOutcome(pieces[0], pieces[1])];
     events.push({ type: 'duel', cell, winner });
-    if (winner !== null) {
-      points[winner] += 1;
-      events.push({ type: 'points', player: winner, amount: 1 });
+    if (winner === null) {
+      continue;
+    }
+    const loser = otherPlayer(winner);
+    const winning = activeEffect(pieces[winner]);
+    const losing = activeEffect(pieces[loser]);
+    const falseLoses = losing === 'loss-points';
+    const base = winning === 'win-bonus' ? PRIZE_POINTS : 1;
+    const won = falseLoses ? 0 : base * (golden[winner] ? 2 : 1);
+    const lost =
+      (falseLoses ? FALSE_POINTS : 0) - (winning === 'drain' ? MARKED_LOSS : 0);
+    for (const [player, net] of [
+      [winner, won],
+      [loser, lost],
+    ] as const) {
+      const next = Math.max(0, points[player] + net);
+      if (next !== points[player]) {
+        events.push({
+          type: 'points',
+          player,
+          amount: next - points[player],
+        });
+        points[player] = next;
+      }
     }
   }
   const roundWinner =

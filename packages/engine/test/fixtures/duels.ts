@@ -8,7 +8,9 @@ import {
   GOLDEN,
   JUST_ROCK,
   LONE,
+  MARKED_ROCK,
   PAPER,
+  PRIZE_ROCK,
   ROCK,
   SCISSORS,
   WANDERING,
@@ -55,11 +57,13 @@ const duel = (
   winner: PlayerId | null,
 ): DuelEvent => ({ type: 'duel', cell: { column, row }, winner });
 
-const scored = (player: PlayerId): DuelEvent => ({
+const changed = (player: PlayerId, amount: number): DuelEvent => ({
   type: 'points',
   player,
-  amount: 1,
+  amount,
 });
+
+const scored = (player: PlayerId): DuelEvent => changed(player, 1);
 
 const plain2x3: Layout = [
   [ROCK, PAPER, SCISSORS],
@@ -206,5 +210,207 @@ export const duelCases: readonly DuelCase[] = [
     ],
   },
 ];
+
+type PointCase = {
+  name: string;
+  c00: readonly [string, string];
+  c11?: readonly [string, string];
+  startPoints?: readonly [number, number];
+  points: readonly [number, number];
+  winner: PlayerId | 'draw';
+  events: readonly DuelEvent[];
+};
+
+const pointCase = ({
+  c00,
+  c11 = [ROCK, ROCK],
+  events,
+  ...rest
+}: PointCase): DuelCase => ({
+  boardSize: '2x2',
+  board0: [
+    [c00[0], SCISSORS],
+    [SCISSORS, c11[0]],
+  ],
+  board1: [
+    [c00[1], SCISSORS],
+    [SCISSORS, c11[1]],
+  ],
+  ...rest,
+  events: [duel(1, 0, null), duel(1, 1, null), ...events, duel(0, 1, null)],
+});
+
+const GOLDEN_FOR_0 = [GOLDEN, LONE] as const;
+
+const pointInputs: readonly PointCase[] = [
+  {
+    name: 'a Prize wins 2 points instead of 1',
+    c00: [PRIZE_ROCK, SCISSORS],
+    points: [2, 0],
+    winner: 0,
+    events: [duel(0, 0, 0), changed(0, 2)],
+  },
+  {
+    name: 'a Prize that loses gives the winner the normal point',
+    c00: [PRIZE_ROCK, PAPER],
+    points: [0, 1],
+    winner: 1,
+    events: [duel(0, 0, 1), changed(1, 1)],
+  },
+  {
+    name: 'a Prize that ties gives nothing',
+    c00: [PRIZE_ROCK, ROCK],
+    points: [0, 0],
+    winner: 'draw',
+    events: [duel(0, 0, null)],
+  },
+  {
+    name: 'a Prize of player 1 wins 2 points',
+    c00: [SCISSORS, PRIZE_ROCK],
+    points: [0, 2],
+    winner: 1,
+    events: [duel(0, 0, 1), changed(1, 2)],
+  },
+  {
+    name: 'a nullified Prize wins 1 point',
+    c00: [`~${PRIZE_ROCK}`, SCISSORS],
+    points: [1, 0],
+    winner: 0,
+    events: [duel(0, 0, 0), changed(0, 1)],
+  },
+  {
+    name: 'a False that loses gives its owner 2 points and the winner none',
+    c00: [FALSE, ROCK],
+    points: [2, 0],
+    winner: 0,
+    events: [duel(0, 0, 1), changed(0, 2)],
+  },
+  {
+    name: 'a False that loses to a Prize gives the winner none either',
+    c00: [FALSE, PRIZE_ROCK],
+    points: [2, 0],
+    winner: 0,
+    events: [duel(0, 0, 1), changed(0, 2)],
+  },
+  {
+    name: 'a False that ties another Shepherd gives nothing',
+    c00: [FALSE, LONE],
+    points: [0, 0],
+    winner: 'draw',
+    events: [duel(0, 0, null)],
+  },
+  {
+    name: 'a nullified False that loses gives the winner the normal point',
+    c00: [`~${FALSE}`, ROCK],
+    points: [0, 1],
+    winner: 1,
+    events: [duel(0, 0, 1), changed(1, 1)],
+  },
+  {
+    name: 'a Marked that wins takes 1 point from the opponent',
+    c00: [MARKED_ROCK, SCISSORS],
+    startPoints: [0, 3],
+    points: [1, 2],
+    winner: 1,
+    events: [duel(0, 0, 0), changed(0, 1), changed(1, -1)],
+  },
+  {
+    name: 'a Marked of player 1 that wins takes 1 point from player 0',
+    c00: [SCISSORS, MARKED_ROCK],
+    startPoints: [3, 0],
+    points: [2, 1],
+    winner: 0,
+    events: [duel(0, 0, 1), changed(1, 1), changed(0, -1)],
+  },
+  {
+    name: 'the Marked deduction never takes a score below 0',
+    c00: [MARKED_ROCK, SCISSORS],
+    points: [1, 0],
+    winner: 0,
+    events: [duel(0, 0, 0), changed(0, 1)],
+  },
+  {
+    name: 'a Marked against a False applies both changes at once',
+    c00: [MARKED_ROCK, FALSE],
+    points: [0, 1],
+    winner: 1,
+    events: [duel(0, 0, 0), changed(1, 1)],
+  },
+  {
+    name: 'a Marked that loses takes nothing',
+    c00: [MARKED_ROCK, PAPER],
+    startPoints: [0, 3],
+    points: [0, 4],
+    winner: 1,
+    events: [duel(0, 0, 1), changed(1, 1)],
+  },
+  {
+    name: 'a nullified Marked that wins takes nothing',
+    c00: [`~${MARKED_ROCK}`, SCISSORS],
+    startPoints: [0, 3],
+    points: [1, 3],
+    winner: 1,
+    events: [duel(0, 0, 0), changed(0, 1)],
+  },
+  {
+    name: 'a Golden doubles its owner duel points',
+    c00: [ROCK, SCISSORS],
+    c11: GOLDEN_FOR_0,
+    points: [2, 0],
+    winner: 0,
+    events: [duel(0, 0, 0), changed(0, 2)],
+  },
+  {
+    name: 'a Golden doubles a Prize win',
+    c00: [PRIZE_ROCK, SCISSORS],
+    c11: GOLDEN_FOR_0,
+    points: [4, 0],
+    winner: 0,
+    events: [duel(0, 0, 0), changed(0, 4)],
+  },
+  {
+    name: 'a Golden does not double the opponent points',
+    c00: [ROCK, PAPER],
+    c11: GOLDEN_FOR_0,
+    points: [0, 1],
+    winner: 1,
+    events: [duel(0, 0, 1), changed(1, 1)],
+  },
+  {
+    name: 'a Golden does not double the points of its own False',
+    c00: [FALSE, ROCK],
+    c11: GOLDEN_FOR_0,
+    points: [2, 0],
+    winner: 0,
+    events: [duel(0, 0, 1), changed(0, 2)],
+  },
+  {
+    name: 'a Golden does not double the Marked deduction',
+    c00: [MARKED_ROCK, SCISSORS],
+    c11: GOLDEN_FOR_0,
+    startPoints: [0, 5],
+    points: [2, 4],
+    winner: 1,
+    events: [duel(0, 0, 0), changed(0, 2), changed(1, -1)],
+  },
+  {
+    name: 'a nullified Golden doubles nothing',
+    c00: [ROCK, SCISSORS],
+    c11: [`~${GOLDEN}`, LONE],
+    points: [1, 0],
+    winner: 0,
+    events: [duel(0, 0, 0), changed(0, 1)],
+  },
+  {
+    name: 'a Golden of player 1 doubles the points of player 1',
+    c00: [SCISSORS, ROCK],
+    c11: [LONE, GOLDEN],
+    points: [0, 2],
+    winner: 1,
+    events: [duel(0, 0, 1), changed(1, 2)],
+  },
+];
+
+export const pointCases: readonly DuelCase[] = pointInputs.map(pointCase);
 
 export const unduelablePhases = ['placing', 'full', 'resolved'] as const;

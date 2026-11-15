@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   duelCases,
   outcomeCases,
+  pointCases,
   unduelablePhases,
 } from '../test/fixtures/duels';
 import { movedState, pieceLabel } from '../test/helpers/duels';
@@ -23,7 +24,7 @@ describe('duelOutcome', () => {
 });
 
 describe('resolveDuels', () => {
-  it.each(duelCases)('$name', (testCase) => {
+  it.each([...duelCases, ...pointCases])('$name', (testCase) => {
     const state = movedState(testCase);
     const result = resolveDuels(state);
     expect(result.state).toEqual({
