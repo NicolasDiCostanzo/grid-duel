@@ -87,7 +87,7 @@ export function createRound(options: {
 }): RoundState {
   const { boardSize, firstPlayer, rng } = options;
   const emptyBoard: Board = Array(allCells(boardSize).length).fill(null);
-  const decks: readonly [Deck, Deck] = [createDeck(), createDeck()];
+  const decks: readonly [Deck, Deck] = [createDeck(rng), createDeck(rng)];
   return {
     boardSize,
     boards: [emptyBoard, emptyBoard],

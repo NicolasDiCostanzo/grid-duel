@@ -95,7 +95,8 @@ describe('createRound', () => {
     for (const board of state.boards) {
       expect(board).toEqual(Array(cells).fill(null));
     }
-    expect(state.decks).toEqual([createDeck(), createDeck()]);
+    const rng = createRng(SEED);
+    expect(state.decks).toEqual([createDeck(rng), createDeck(rng)]);
     expect(state.offer).toHaveLength(3);
     expect(new Set(state.offer).size).toBe(3);
     for (const id of state.offer) {
@@ -140,7 +141,7 @@ describe('applyMove', () => {
     for (const id of state.offer.filter((id) => id !== move!.pieceId)) {
       expect(next.decks[0]).toContain(id);
     }
-    expect(next.decks[1]).toEqual(createDeck());
+    expect(next.decks[1]).toEqual(state.decks[1]);
     expect(state.boards[0].every((placed) => placed === null)).toBe(true);
   });
 
