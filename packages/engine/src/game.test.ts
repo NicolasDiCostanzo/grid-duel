@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { EXPECTED_PIECE_COUNT } from '../test/fixtures/catalog';
 import {
   gameSeeds,
+  gameViewKeys,
   maxMovesPerGame,
   replayStops,
   roundEndCases,
 } from '../test/fixtures/game';
+import { OTHER_SEED } from '../test/fixtures/rng';
 import { hexSeedFor, boardSizes } from '../test/fixtures/round';
 import {
   almostFullGame,
@@ -15,9 +17,22 @@ import {
   randomPicker,
 } from '../test/helpers/game';
 import { errorCode } from '../test/helpers/round';
-import { applyMove, createGame, legalMoves, recordOf, replay } from './game';
+import {
+  applyMove,
+  createGame,
+  legalMoves,
+  recordOf,
+  replay,
+  view,
+} from './game';
 import { matchStatus } from './match';
-import { legalMoves as roundLegalMoves, type PlayerId } from './round';
+import {
+  legalMoves as roundLegalMoves,
+  otherPlayer,
+  withPlayer,
+  type PlayerId,
+} from './round';
+import { createRng } from './rng';
 
 describe('createGame', () => {
   it.each(boardSizes)(
@@ -193,5 +208,106 @@ describe('replay', () => {
       moves: [...recordOf(state).moves, first!],
     };
     expect(errorCode(() => replay(record))).toBe('game-over');
+  });
+});
+
+describe('view', () => {
+  const fresh = createGame({ seed: hexSeedFor(1), boardSize: '2x2' });
+  const midRound = playOut(fresh, {
+    maxMoves: 5,
+    pick: randomPicker(hexSeedFor(101)),
+  }).state;
+  const finished = playOut(fresh, { maxMoves: maxMovesPerGame }).state;
+  const states = [
+    ['a new game', fresh],
+    ['a game in the middle of a round', midRound],
+    ['a finished game', finished],
+  ] as const;
+  const players = [0, 1] as const;
+
+  it.each(
+    states.flatMap(([name, game]) =>
+      players.map((player) => [name, game, player] as const),
+    ),
+  )('exposes only public keys in %s for player %i', (_name, game, player) => {
+    expect(Object.keys(view(game, player)).toSorted()).toEqual(gameViewKeys);
+  });
+
+  it.each(players)(
+    'shows player %i their own deck and both boards',
+    (player) => {
+      const result = view(midRound, player);
+      expect(result.deck).toEqual(midRound.round.decks[player].toSorted());
+      expect(result.boards).toEqual(midRound.round.boards);
+      expect(result.player).toBe(player);
+    },
+  );
+
+  it('shows the offer only to the player whose turn it is', () => {
+    const current = fresh.round.currentPlayer ?? 0;
+    expect(view(fresh, current).offer).toEqual(fresh.round.offer);
+    expect(view(fresh, otherPlayer(current)).offer).toBeNull();
+  });
+
+  it('never contains the seed', () => {
+    for (const [, game] of states) {
+      for (const player of players) {
+        expect(JSON.stringify(view(game, player))).not.toContain(game.seed);
+      }
+    }
+  });
+
+  const current = fresh.round.currentPlayer ?? 0;
+  const viewer = otherPlayer(current);
+  const hiddenChanges: readonly (readonly [
+    string,
+    (game: typeof fresh) => typeof fresh,
+  ])[] = [
+    [
+      "the other player's deck",
+      (game) => ({
+        ...game,
+        round: {
+          ...game.round,
+          decks: withPlayer(
+            game.round.decks,
+            current,
+            game.round.decks[current].toReversed(),
+          ),
+        },
+      }),
+    ],
+    [
+      "the other player's offer",
+      (game) => ({ ...game, round: { ...game.round, offer: [] } }),
+    ],
+    [
+      'the generator state',
+      (game) => ({
+        ...game,
+        round: { ...game.round, rngState: createRng(OTHER_SEED).snapshot() },
+      }),
+    ],
+    ['the seed', (game) => ({ ...game, seed: OTHER_SEED })],
+    ['the move log', (game) => ({ ...game, moves: [] })],
+  ];
+
+  it.each(hiddenChanges)('does not depend on %s', (_name, change) => {
+    expect(view(change(fresh), viewer)).toEqual(view(fresh, viewer));
+  });
+
+  it.each(roundEndCases)('reports the tally after: $name', (testCase) => {
+    const { state } = applyMove(almostFullGame(testCase), 1, {
+      pieceId: lastPieceId(testCase),
+      cell: lastCell,
+    });
+    const { wins } = matchStatus(testCase.results);
+    for (const player of players) {
+      expect(view(state, player)).toMatchObject({
+        results: testCase.results,
+        wins,
+        winner: testCase.matchWinner,
+      });
+    }
   });
 });

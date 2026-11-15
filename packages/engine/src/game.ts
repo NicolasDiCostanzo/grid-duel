@@ -7,9 +7,11 @@ import {
   createRound,
   legalMoves as roundLegalMoves,
   pickFirstPlayer,
+  playerView,
   type BoardSize,
   type Move,
   type PlayerId,
+  type PlayerView,
   type RoundState,
 } from './round';
 
@@ -129,3 +131,16 @@ export function replay(record: GameRecord): {
   }
   return { state, events };
 }
+
+export type GameView = PlayerView & {
+  results: readonly RoundResult[];
+  wins: readonly [number, number];
+  winner: PlayerId | null;
+};
+
+export const view = (game: GameState, player: PlayerId): GameView => ({
+  ...playerView(game.round, player),
+  results: game.results,
+  wins: matchStatus(game.results).wins,
+  winner: game.winner,
+});

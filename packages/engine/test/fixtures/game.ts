@@ -3,6 +3,7 @@ import type { RoundResult } from '../../src/match';
 import type { PlayerId } from '../../src/round';
 import { plain2x2, type Layout } from './moves';
 import { PAPER, ROCK } from './pieces';
+import { publicViewKeys } from './round';
 
 export type RoundEndCase = {
   name: string;
@@ -134,3 +135,10 @@ export const gameSeeds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 export const maxMovesPerGame = 5000;
 
 export const replayStops = [0, 1, 7, 30, maxMovesPerGame] as const;
+
+export const gameViewKeys = [
+  ...publicViewKeys,
+  'results',
+  'wins',
+  'winner',
+].toSorted();
