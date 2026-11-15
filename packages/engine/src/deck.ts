@@ -6,8 +6,13 @@ export type Deck = readonly string[];
 const OFFER_SIZE = 3;
 const SHORT_OFFER_SIZE = 1;
 
-export function createDeck(): Deck {
-  return catalog.map((piece) => piece.id);
+export function createDeck(rng: Rng): Deck {
+  const deck = catalog.map((piece) => piece.id);
+  for (let index = 0; index < deck.length; index++) {
+    const other = index + rng.nextInt(deck.length - index);
+    [deck[index], deck[other]] = [deck[other] as string, deck[index] as string];
+  }
+  return deck;
 }
 
 export function offerSize(loneInPlay: boolean): number {
