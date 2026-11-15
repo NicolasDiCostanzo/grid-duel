@@ -142,3 +142,11 @@ export const gameViewKeys = [
   'wins',
   'winner',
 ].toSorted();
+
+export const randomSeeds: readonly number[] = Array.from(
+  { length: 100 },
+  (_, index) => index + 1,
+);
+export const randomGameRounds = 6;
+export const drawnHistory: readonly RoundResult[] = ['draw', 'draw', 'draw'];
+export const drawnSeeds: readonly number[] = randomSeeds.slice(0, 40);
