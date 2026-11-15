@@ -36,7 +36,7 @@ export type Piece = RegularPiece | ShepherdPiece;
 
 export type Outcome = 'win' | 'lose' | 'tie';
 
-const REGULAR_TYPES: readonly RegularType[] = [0, 1, 2];
+export const REGULAR_TYPES: readonly RegularType[] = [0, 1, 2];
 
 const REGULAR_EFFECTS: readonly RegularEffect[] = [
   'tie-win',

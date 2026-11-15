@@ -15,6 +15,7 @@ export type RoundState = {
   boards: readonly [Board, Board];
   decks: readonly [Deck, Deck];
   firstPlayer: PlayerId;
+  points: readonly [number, number];
   currentPlayer: PlayerId | null;
   offer: readonly string[];
   phase: RoundPhase;
@@ -143,6 +144,7 @@ export function createRound(options: {
     boards: [emptyBoard, emptyBoard],
     decks,
     firstPlayer,
+    points: [0, 0],
     currentPlayer: firstPlayer,
     offer: drawOffer(decks[firstPlayer], offerSize(false), rng),
     phase: 'placing',
