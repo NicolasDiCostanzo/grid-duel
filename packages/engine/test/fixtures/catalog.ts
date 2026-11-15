@@ -1,3 +1,18 @@
+import {
+  FALSE,
+  GOLDEN,
+  JUST_ROCK,
+  LONE,
+  MARKED_ROCK,
+  PAPER,
+  PRIZE_PAPER,
+  RISEN_PAPER,
+  ROCK,
+  SCISSORS,
+  TRICKSTER_PAPER,
+  WANDERING,
+} from './pieces';
+
 export const EXPECTED_PIECE_COUNT = 36;
 
 export const REGULAR_TYPES = [0, 1, 2] as const;
@@ -27,20 +42,20 @@ export type Outcome = 'win' | 'lose' | 'tie';
 
 export const typeComparisons: readonly (readonly [string, string, Outcome])[] =
   [
-    ['r0', 'r2', 'win'],
-    ['r0', 'r1', 'lose'],
-    ['r0', 'r0', 'tie'],
-    ['r1', 'r0', 'win'],
-    ['r1', 'r2', 'lose'],
-    ['r1', 'r1', 'tie'],
-    ['r2', 'r1', 'win'],
-    ['r2', 'r0', 'lose'],
-    ['r2', 'r2', 'tie'],
-    ['r0.tie-win', 'r0', 'tie'],
-    ['r1.win-bonus', 'r0.drain', 'win'],
-    ['s.short-offer', 'r0', 'lose'],
-    ['s.double-points', 'r1.shift-up', 'lose'],
-    ['r2', 's.loss-points', 'win'],
-    ['r1.retype', 's.move-points', 'win'],
-    ['s.short-offer', 's.double-points', 'tie'],
+    [ROCK, SCISSORS, 'win'],
+    [ROCK, PAPER, 'lose'],
+    [ROCK, ROCK, 'tie'],
+    [PAPER, ROCK, 'win'],
+    [PAPER, SCISSORS, 'lose'],
+    [PAPER, PAPER, 'tie'],
+    [SCISSORS, PAPER, 'win'],
+    [SCISSORS, ROCK, 'lose'],
+    [SCISSORS, SCISSORS, 'tie'],
+    [JUST_ROCK, ROCK, 'tie'],
+    [PRIZE_PAPER, MARKED_ROCK, 'win'],
+    [LONE, ROCK, 'lose'],
+    [GOLDEN, RISEN_PAPER, 'lose'],
+    [SCISSORS, FALSE, 'win'],
+    [TRICKSTER_PAPER, WANDERING, 'win'],
+    [LONE, GOLDEN, 'tie'],
   ];
