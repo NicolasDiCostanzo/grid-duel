@@ -22,10 +22,20 @@ export type GameEvent =
     }
   | { type: 'match-ended'; winner: PlayerId };
 
+export type RecordedMove = Move & { player: PlayerId };
+
+export type GameRecord = {
+  seed: string;
+  boardSize: BoardSize;
+  moves: readonly RecordedMove[];
+};
+
 export type GameState = {
   round: RoundState;
   results: readonly RoundResult[];
   winner: PlayerId | null;
+  seed: string;
+  moves: readonly RecordedMove[];
 };
 
 export type GameErrorCode = 'game-over';
@@ -46,7 +56,7 @@ export function createGame(options: {
     firstPlayer: pickFirstPlayer(rng),
     rng,
   });
-  return { round, results: [], winner: null };
+  return { round, results: [], winner: null, seed: options.seed, moves: [] };
 }
 
 export function legalMoves(game: GameState): Move[] {
@@ -62,8 +72,12 @@ export function applyMove(
     throw new GameError('game-over');
   }
   const placed = applyRoundMove(game.round, player, move);
+  const moves = [
+    ...game.moves,
+    { player, pieceId: move.pieceId, cell: move.cell },
+  ];
   if (placed.phase !== 'full') {
-    return { state: { ...game, round: placed }, events: [] };
+    return { state: { ...game, round: placed, moves }, events: [] };
   }
   const moved = resolveMoves(placed);
   const duels = resolveDuels(moved.state);
@@ -80,12 +94,38 @@ export function applyMove(
   ];
   if (winner !== null) {
     events.push({ type: 'match-ended', winner });
-    return { state: { round: resolved, results, winner }, events };
+    return {
+      state: { round: resolved, results, winner, seed: game.seed, moves },
+      events,
+    };
   }
   const round = createRound({
     boardSize: resolved.boardSize,
     firstPlayer: nextFirstPlayer(resolved.firstPlayer, resolved.winner),
     rng: restoreRng(resolved.rngState),
   });
-  return { state: { round, results, winner: null }, events };
+  return {
+    state: { round, results, winner: null, seed: game.seed, moves },
+    events,
+  };
+}
+
+export const recordOf = (game: GameState): GameRecord => ({
+  seed: game.seed,
+  boardSize: game.round.boardSize,
+  moves: game.moves,
+});
+
+export function replay(record: GameRecord): {
+  state: GameState;
+  events: GameEvent[];
+} {
+  let state = createGame(record);
+  const events: GameEvent[] = [];
+  for (const { player, ...move } of record.moves) {
+    const result = applyMove(state, player, move);
+    state = result.state;
+    events.push(...result.events);
+  }
+  return { state, events };
 }

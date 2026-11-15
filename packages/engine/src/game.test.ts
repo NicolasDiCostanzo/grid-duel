@@ -3,6 +3,7 @@ import { EXPECTED_PIECE_COUNT } from '../test/fixtures/catalog';
 import {
   gameSeeds,
   maxMovesPerGame,
+  replayStops,
   roundEndCases,
 } from '../test/fixtures/game';
 import { hexSeedFor, boardSizes } from '../test/fixtures/round';
@@ -11,11 +12,12 @@ import {
   lastCell,
   lastPieceId,
   playOut,
+  randomPicker,
 } from '../test/helpers/game';
 import { errorCode } from '../test/helpers/round';
-import { applyMove, createGame, legalMoves } from './game';
+import { applyMove, createGame, legalMoves, recordOf, replay } from './game';
 import { matchStatus } from './match';
-import { legalMoves as roundLegalMoves } from './round';
+import { legalMoves as roundLegalMoves, type PlayerId } from './round';
 
 describe('createGame', () => {
   it.each(boardSizes)(
@@ -120,13 +122,76 @@ describe('a whole game', () => {
   it.each(cases)(
     'plays $boardSize seed $seed to a winner',
     ({ boardSize, seed }) => {
-      const game = playOut(
+      const { state: game } = playOut(
         createGame({ seed: hexSeedFor(seed), boardSize }),
-        maxMovesPerGame,
+        { maxMoves: maxMovesPerGame },
       );
       expect(game.winner).not.toBeNull();
       expect(matchStatus(game.results).winner).toBe(game.winner);
       expect(game.round.phase).toBe('resolved');
     },
   );
+});
+
+describe('recordOf', () => {
+  const game = createGame({ seed: hexSeedFor(1), boardSize: '2x3' });
+
+  it('describes a new game by its seed and board size', () => {
+    expect(recordOf(game)).toEqual({
+      seed: hexSeedFor(1),
+      boardSize: '2x3',
+      moves: [],
+    });
+  });
+
+  it('lists each move with its player', () => {
+    const [move] = legalMoves(game);
+    const player = game.round.currentPlayer ?? 0;
+    const { state } = applyMove(game, player, move!);
+    expect(recordOf(state).moves).toEqual([{ player, ...move }]);
+  });
+});
+
+describe('replay', () => {
+  const cases = boardSizes.flatMap(([boardSize]) =>
+    gameSeeds.flatMap((seed) =>
+      replayStops.map((stop) => ({ boardSize, seed, stop })),
+    ),
+  );
+
+  it.each(cases)(
+    'rebuilds the state and events of $boardSize seed $seed after $stop moves',
+    ({ boardSize, seed, stop }) => {
+      const played = playOut(
+        createGame({ seed: hexSeedFor(seed), boardSize }),
+        { maxMoves: stop, pick: randomPicker(hexSeedFor(seed + 100)) },
+      );
+      const record = JSON.parse(JSON.stringify(recordOf(played.state)));
+      expect(replay(record)).toEqual(played);
+    },
+  );
+
+  it('rejects a move that is not legal at its point of the game', () => {
+    const game = createGame({ seed: hexSeedFor(1), boardSize: '2x2' });
+    const [move] = legalMoves(game);
+    const wrongPlayer: PlayerId = game.round.currentPlayer === 0 ? 1 : 0;
+    const record = {
+      ...recordOf(game),
+      moves: [{ player: wrongPlayer, ...move! }],
+    };
+    expect(errorCode(() => replay(record))).toBe('wrong-turn');
+  });
+
+  it('rejects a move recorded after the end of the match', () => {
+    const { state } = playOut(
+      createGame({ seed: hexSeedFor(1), boardSize: '2x2' }),
+      { maxMoves: maxMovesPerGame },
+    );
+    const [first] = recordOf(state).moves;
+    const record = {
+      ...recordOf(state),
+      moves: [...recordOf(state).moves, first!],
+    };
+    expect(errorCode(() => replay(record))).toBe('game-over');
+  });
 });

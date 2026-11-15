@@ -132,3 +132,5 @@ export const roundEndCases: readonly RoundEndCase[] = [
 
 export const gameSeeds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 export const maxMovesPerGame = 5000;
+
+export const replayStops = [0, 1, 7, 30, maxMovesPerGame] as const;

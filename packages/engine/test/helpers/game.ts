@@ -1,6 +1,11 @@
 import { createRng } from '../../src/rng';
-import { applyMove, legalMoves, type GameState } from '../../src/game';
-import { createRound } from '../../src/round';
+import {
+  applyMove,
+  legalMoves,
+  type GameEvent,
+  type GameState,
+} from '../../src/game';
+import { createRound, type Move } from '../../src/round';
 import type { RoundEndCase } from '../fixtures/game';
 import { SEED } from '../fixtures/rng';
 import { layoutBoard } from './moves';
@@ -35,17 +40,39 @@ export const almostFullGame = (testCase: RoundEndCase): GameState => {
     },
     results: testCase.history,
     winner: null,
+    seed: SEED,
+    moves: [],
   };
 };
 
-export const playOut = (game: GameState, maxMoves: number): GameState => {
-  let current = game;
-  for (let played = 0; played < maxMoves; played++) {
-    const [move] = legalMoves(current);
-    if (move === undefined) {
-      return current;
+type Picker = (moves: readonly Move[]) => Move;
+
+const firstMove: Picker = (moves) => moves[0] as Move;
+
+export const randomPicker = (seed: string): Picker => {
+  const rng = createRng(seed);
+  return (moves) => moves[rng.nextInt(moves.length)] as Move;
+};
+
+export const playOut = (
+  game: GameState,
+  options: { maxMoves: number; pick?: Picker },
+): { state: GameState; events: GameEvent[] } => {
+  const pick = options.pick ?? firstMove;
+  const events: GameEvent[] = [];
+  let state = game;
+  for (let played = 0; played < options.maxMoves; played++) {
+    const moves = legalMoves(state);
+    if (moves.length === 0) {
+      break;
     }
-    current = applyMove(current, current.round.currentPlayer ?? 0, move).state;
+    const result = applyMove(
+      state,
+      state.round.currentPlayer ?? 0,
+      pick(moves),
+    );
+    state = result.state;
+    events.push(...result.events);
   }
-  return current;
+  return { state, events };
 };
