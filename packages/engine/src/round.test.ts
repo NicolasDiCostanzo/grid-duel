@@ -1,18 +1,26 @@
 import { describe, expect, it } from 'vitest';
 import { SEED } from '../test/fixtures/rng';
 import {
+  activeLone,
   boardSizes,
   cellIndexes,
   firstPlayerSeedCount,
   hexSeedFor,
   invalidCells,
   loneOfferSizes,
+  plainPlaced,
   publicViewKeys,
+  regularOffer,
+  scoutOffer,
+  scoutPiece,
+  scoutTargets,
+  skipOfferSizes,
 } from '../test/fixtures/round';
 import {
   errorCode,
   forceOffer,
   playFirstLegalMove,
+  withFilledBoard,
   withPlaced,
 } from '../test/helpers/round';
 import { createDeck } from './deck';
@@ -26,6 +34,7 @@ import {
   pieceAt,
   playerView,
   type BoardSize,
+  type Cell,
   type PlayerId,
 } from './round';
 
@@ -254,6 +263,130 @@ describe('Lone', () => {
       expect(next.offer).toHaveLength(expected);
     },
   );
+});
+
+const scoutState = (
+  boardSize: BoardSize,
+  own: readonly Cell[],
+  enemy: readonly Cell[],
+) => {
+  let state = forceOffer(newRound(boardSize), scoutOffer);
+  for (const cell of own) {
+    state = withPlaced(state, 0, cell, plainPlaced);
+  }
+  for (const cell of enemy) {
+    state = withPlaced(state, 1, cell, plainPlaced);
+  }
+  return state;
+};
+
+describe('Scout', () => {
+  it.each(scoutTargets)(
+    '$name: lists the Scout only on its targets',
+    ({ boardSize, own, enemy, scoutCells }) => {
+      const state = scoutState(boardSize, own, enemy);
+      const moves = legalMoves(state);
+      const cellsOf = (pieceId: string) =>
+        moves.filter((move) => move.pieceId === pieceId).map((m) => m.cell);
+      expect(cellsOf(scoutPiece)).toEqual(scoutCells);
+      expect(cellsOf('r1')).toHaveLength(
+        state.boards[0].filter((placed) => placed === null).length,
+      );
+      for (const move of moves) {
+        expect(() => applyMove(state, 0, move)).not.toThrow();
+      }
+    },
+  );
+
+  it('replaces the enemy piece and leaves the own board unchanged', () => {
+    const cell: Cell = { column: 1, row: 0 };
+    const state = scoutState('2x2', [], [cell]);
+    const next = applyMove(state, 0, { pieceId: scoutPiece, cell });
+    expect(pieceAt(next, 1, cell)).toEqual({
+      pieceId: scoutPiece,
+      nullified: false,
+    });
+    expect(next.boards[0]).toEqual(state.boards[0]);
+    expect(next.decks[0]).toHaveLength(35);
+    expect(next.decks[0]).not.toContain(scoutPiece);
+    expect(next.decks[1]).toEqual(state.decks[1]);
+    expect(next.currentPlayer).toBe(1);
+  });
+
+  it('is placed on the own board when the enemy board is empty', () => {
+    const cell: Cell = { column: 0, row: 1 };
+    const state = scoutState('2x2', [], []);
+    const next = applyMove(state, 0, { pieceId: scoutPiece, cell });
+    expect(pieceAt(next, 0, cell)).toEqual({
+      pieceId: scoutPiece,
+      nullified: false,
+    });
+    expect(next.boards[1]).toEqual(state.boards[1]);
+  });
+
+  it('rejects an empty enemy cell while an enemy piece exists', () => {
+    const state = scoutState('2x2', [], [{ column: 1, row: 0 }]);
+    expect(
+      errorCode(() =>
+        applyMove(state, 0, {
+          pieceId: scoutPiece,
+          cell: { column: 0, row: 0 },
+        }),
+      ),
+    ).toBe('no-piece-to-replace');
+  });
+});
+
+describe('skipping a player with a full board', () => {
+  const emptyCell: Cell = { column: 1, row: 1 };
+  const opponentFull = (blessed = plainPlaced, offer = regularOffer) =>
+    withPlaced(
+      withFilledBoard(forceOffer(newRound('2x2'), offer), 1, plainPlaced),
+      1,
+      { column: 0, row: 0 },
+      blessed,
+    );
+
+  it('gives the turn to the same player again', () => {
+    const next = applyMove(opponentFull(), 0, {
+      pieceId: 'r1',
+      cell: emptyCell,
+    });
+    expect(next.phase).toBe('placing');
+    expect(next.currentPlayer).toBe(0);
+    expect(next.offer).toHaveLength(3);
+    for (const id of next.offer) {
+      expect(next.decks[0]).toContain(id);
+    }
+  });
+
+  it.each(skipOfferSizes)(
+    'with %s on the full opponent board, the offer has size %i',
+    (_, expected, placed) => {
+      const next = applyMove(opponentFull(placed), 0, {
+        pieceId: 'r1',
+        cell: emptyCell,
+      });
+      expect(next.offer).toHaveLength(expected);
+    },
+  );
+
+  it('keeps the turn after a Scout replaces an enemy piece, and the removed Lone no longer shortens the offer', () => {
+    const state = opponentFull(activeLone, scoutOffer);
+    const next = applyMove(state, 0, {
+      pieceId: scoutPiece,
+      cell: { column: 0, row: 0 },
+    });
+    expect(next.currentPlayer).toBe(0);
+    expect(next.offer).toHaveLength(3);
+  });
+
+  it('ends the round once both boards are full', () => {
+    const state = withFilledBoard(opponentFull(), 0, plainPlaced, [emptyCell]);
+    const next = applyMove(state, 0, { pieceId: 'r1', cell: emptyCell });
+    expect(next.phase).toBe('full');
+    expect(next.currentPlayer).toBeNull();
+  });
 });
 
 describe('playerView', () => {

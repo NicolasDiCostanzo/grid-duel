@@ -16,7 +16,8 @@ The engine follows `docs/reference/flockade-rules.md` (copy of the original wiki
 - Layout: each player has their own board, 2 columns by 2 rows (2x2) or by 3 rows (2x3). The two boards face each other, and a duel pairs the cells in the same column and row on the two boards.
 - Duel phase start: the duels begin only when every cell of both boards holds a piece.
 - Rotten: it nullifies the blessings on the opponent's row that has the same row index as the Rotten's own row.
-- Scout: it is played on an enemy piece's cell. That piece is removed from the game and the Scout takes its cell, staying owned by the player who played it.
+- Scout: it is played on an enemy piece's cell, so on the opponent's board. That piece is removed from the game and the Scout takes its cell. A piece counts for the board side it sits on, whoever placed it, and the Scout duels as its own type. When the opponent's board holds no piece, the Scout is placed like any piece, on an empty cell of its player's own board. Playing a Scout counts as the turn's placement.
+- Turns: players alternate. A player whose board is full is skipped and the other player plays again, which only happens after a Scout replaced a piece instead of filling a cell.
 - First player: chosen at random for round 1. In later rounds the previous round's winner goes first; after a drawn round, the player who went first goes first again.
 - Trickster: at the start of the duel phase it turns into a piece drawn at random (server-side, from the game's seed) among the two regular (unblessed) pieces of the other types (a Trickster Sword becomes a regular Shield or Scribe, and so on), so it never keeps its type or gains a blessing, at its place in the 1 to 4 sequence.
 - Hard board (2x3): the 1 to 4 sequence extends column by column, right column first, top to bottom, over 3 rows of 2 columns.

@@ -31,7 +31,12 @@ export type PlayerView = {
 };
 
 export type PlacementErrorCode =
-  'wrong-turn' | 'not-offered' | 'invalid-cell' | 'occupied' | 'round-over';
+  | 'wrong-turn'
+  | 'not-offered'
+  | 'invalid-cell'
+  | 'occupied'
+  | 'no-piece-to-replace'
+  | 'round-over';
 
 export class PlacementError extends Error {
   constructor(readonly code: PlacementErrorCode) {
@@ -56,6 +61,21 @@ const hasActiveLone = (board: Board): boolean =>
       !placed.nullified &&
       getPiece(placed.pieceId).effect === 'short-offer',
   );
+
+const isScout = (pieceId: string): boolean =>
+  getPiece(pieceId).effect === 'replace';
+
+const isFull = (board: Board): boolean =>
+  board.every((placed) => placed !== null);
+
+const hasPiece = (board: Board): boolean =>
+  board.some((placed) => placed !== null);
+
+const withPlayer = <T>(
+  pair: readonly [T, T],
+  player: PlayerId,
+  value: T,
+): readonly [T, T] => (player === 0 ? [value, pair[1]] : [pair[0], value]);
 
 export function pickFirstPlayer(rng: Rng): PlayerId {
   return rng.nextInt(2) as PlayerId;
@@ -103,12 +123,17 @@ export function legalMoves(state: RoundState): Move[] {
   if (state.phase !== 'placing' || state.currentPlayer === null) {
     return [];
   }
-  const board = state.boards[state.currentPlayer];
-  const emptyCells = allCells(state.boardSize).filter(
-    (_, index) => board[index] === null,
-  );
+  const cellsWhere = (board: Board, occupied: boolean) =>
+    allCells(state.boardSize).filter(
+      (_, index) => (board[index] !== null) === occupied,
+    );
+  const emptyCells = cellsWhere(state.boards[state.currentPlayer], false);
+  const enemyBoard = state.boards[otherPlayer(state.currentPlayer)];
+  const enemyCells = cellsWhere(enemyBoard, true);
   return state.offer.flatMap((pieceId) =>
-    emptyCells.map((cell) => ({ pieceId, cell })),
+    (isScout(pieceId) && enemyCells.length > 0 ? enemyCells : emptyCells).map(
+      (cell) => ({ pieceId, cell }),
+    ),
   );
 }
 
@@ -126,22 +151,29 @@ export function applyMove(
   if (!state.offer.includes(move.pieceId)) {
     throw new PlacementError('not-offered');
   }
+  const opponent = otherPlayer(player);
+  const replacing = isScout(move.pieceId) && hasPiece(state.boards[opponent]);
+  const target = replacing ? opponent : player;
   const index = cellIndex(state.boardSize, move.cell);
-  if (state.boards[player][index] !== null) {
+  if (replacing && state.boards[target][index] === null) {
+    throw new PlacementError('no-piece-to-replace');
+  }
+  if (!replacing && state.boards[target][index] !== null) {
     throw new PlacementError('occupied');
   }
 
-  const board = state.boards[player].with(index, {
+  const board = state.boards[target].with(index, {
     pieceId: move.pieceId,
     nullified: false,
   });
-  const boards: readonly [Board, Board] =
-    player === 0 ? [board, state.boards[1]] : [state.boards[0], board];
-  const deck = consume(state.decks[player], move.pieceId);
-  const decks: readonly [Deck, Deck] =
-    player === 0 ? [deck, state.decks[1]] : [state.decks[0], deck];
+  const boards = withPlayer(state.boards, target, board);
+  const decks = withPlayer(
+    state.decks,
+    player,
+    consume(state.decks[player], move.pieceId),
+  );
 
-  if (boards.every((candidate) => candidate.every((cell) => cell !== null))) {
+  if (boards.every(isFull)) {
     return {
       ...state,
       boards,
@@ -152,9 +184,13 @@ export function applyMove(
     };
   }
 
-  const next = otherPlayer(player);
+  const next = isFull(boards[opponent]) ? player : opponent;
   const rng = restoreRng(state.rngState);
-  const offer = drawOffer(decks[next], offerSize(hasActiveLone(board)), rng);
+  const offer = drawOffer(
+    decks[next],
+    offerSize(hasActiveLone(boards[otherPlayer(next)])),
+    rng,
+  );
   return {
     ...state,
     boards,

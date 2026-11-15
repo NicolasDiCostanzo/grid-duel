@@ -26,6 +26,21 @@ export const withPlaced = (
   return { ...state, boards };
 };
 
+export const withFilledBoard = (
+  state: RoundState,
+  player: PlayerId,
+  placed: Placed,
+  empty: readonly Cell[] = [],
+): RoundState => {
+  const emptyIndexes = empty.map((cell) => cellIndex(state.boardSize, cell));
+  const board = state.boards[player].map((_, index) =>
+    emptyIndexes.includes(index) ? null : placed,
+  );
+  const boards: RoundState['boards'] =
+    player === 0 ? [board, state.boards[1]] : [state.boards[0], board];
+  return { ...state, boards };
+};
+
 export const playFirstLegalMove = (state: RoundState): RoundState => {
   const [move] = legalMoves(state);
   if (move === undefined || state.currentPlayer === null) {
