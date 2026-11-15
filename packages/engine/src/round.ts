@@ -8,7 +8,7 @@ export type Cell = { column: 0 | 1; row: number };
 export type Placed = { pieceId: string; nullified: boolean };
 export type Board = readonly (Placed | null)[];
 export type Move = { pieceId: string; cell: Cell };
-export type RoundPhase = 'placing' | 'full' | 'moved';
+export type RoundPhase = 'placing' | 'full' | 'moved' | 'resolved';
 
 export type RoundState = {
   boardSize: BoardSize;
@@ -20,6 +20,7 @@ export type RoundState = {
   offer: readonly string[];
   phase: RoundPhase;
   rngState: RngState;
+  winner: PlayerId | 'draw' | null;
 };
 
 export type PlayerView = {
@@ -149,6 +150,7 @@ export function createRound(options: {
     offer: drawOffer(decks[firstPlayer], offerSize(false), rng),
     phase: 'placing',
     rngState: rng.snapshot(),
+    winner: null,
   };
 }
 

@@ -108,10 +108,15 @@ When both boards are full, apply the effects that change the board, in sequence 
 - Nullified blessings (from Rotten or Rotten+) do nothing.
 - Every transition emits an ordered list of events (piece moved, piece transformed, points gained) that the client will animate later.
 
-### Open rule questions (not validated: ask the user before writing tests)
-1. Fallen and Risen wrap around inside the column (the piece pushed off one end appears at the other end), because a full board has no free square. Proposed default.
-2. Sequence positions are the cells at the start of the duel phase, and an effect uses its piece's current cell when it acts. Proposed default.
-3. At the same sequence number, the round's first player resolves first. Proposed default.
+### Rule decisions (RULES.md)
+All decided with the user and recorded in RULES.md as interpretations:
+- Fallen and Risen wrap around inside the column (the piece pushed off one end appears at the other end), because a full board has no free square. A moved piece keeps its nullified state.
+- Sequence positions are the cells at the start of the duel phase, and an effect uses its piece's current cell when it acts. Each piece acts once.
+- At the same sequence position, the round's first player resolves first. Effects only touch the board they sit on.
+- Mercenary swaps with the piece of the other column in its current row, on its own board.
+- Trickster: each active Trickster makes one draw of the seeded generator at its place in the sequence (a nullified one makes none) and becomes a plain piece of one of the other two types.
+- Wandering: 2 points for each move of the piece, whatever moved it, for the player whose board it sits on. The points are added to the round score in the effects phase.
+- Nullified Fallen, Risen, Mercenary, Trickster and Wandering do nothing.
 
 ### Done when
 Table-driven tests with fixtures cover each effect, both board sizes, the order of several effects in one column, and the event list. `npm test` passes.
@@ -139,12 +144,17 @@ After the moves, resolve each duel between facing cells, award points and decide
 - Nullified blessings do nothing.
 - Duel events are emitted in order (duel resolved, points changed) for the client.
 
-### Open rule questions (not validated: ask the user before writing tests)
-1. Guardian: if it wins its duel against a Marked piece, its owner wins the whole round immediately, whatever the points. Proposed default.
-2. False: the 2 points go to the False piece's owner when it loses (not to the winner, who still gets their normal point). Proposed default.
-3. Golden: it doubles only its owner's duel points. Proposed default.
-4. Marked: the round score may not go below 0. Proposed default.
-5. Order of duels: facing pairs in sequence order 1 to 4, so Guardian and score effects resolve in the same order. Proposed default.
+### Rule decisions (RULES.md)
+All decided with the user and recorded in RULES.md as interpretations:
+- Duels are resolved in sequence order (right column first, top to bottom, then the left column). The round score starts with the points earned in the effects phase (Wandering).
+- Guardian: facing an active Marked piece wins the round at once for its owner, whatever the points. The remaining duels are not played, no point is awarded for that duel, and the first trigger in sequence order decides. The effect is read from the catalog, not from piece ids.
+- False: when it loses, its owner gets 2 points and the winner of that duel gets none.
+- Golden: it doubles its owner's duel points (a Prize win gives 4), not the opponent's points, the False points or the Marked deduction.
+- Marked: the score never goes below 0. Both scores change at the same time inside one duel (changes added up, then floored), so a Marked winning against a False gives the False owner +2 -1 = +1.
+- Just against Just ties.
+
+### Delivered interface (used by 1.6)
+`duelOutcome(a, b)` and `resolveDuels(state)` in `packages/engine/src/duels.ts`. `resolveDuels` takes a round in phase `moved` and returns the state in phase `resolved` with `winner` (a player, or `draw`) plus the events: `duel`, `points` (signed, one per player whose score changed) and `guardian`. Any other phase is rejected with `DuelsError('not-moved')`.
 
 ### Done when
 Table-driven tests with fixtures cover every blessing alone and the main interactions (Prize with Golden, Marked with Guardian, Just against Just, nullified blessings). `npm test` passes.
