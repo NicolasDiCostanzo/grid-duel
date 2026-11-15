@@ -40,6 +40,7 @@ import {
   type Cell,
   type PlayerId,
 } from './round';
+import { LONE, PAPER, ROCK, SCISSORS } from '../test/fixtures/pieces';
 
 const newRound = (boardSize: BoardSize, firstPlayer: PlayerId = 0) =>
   createRound({ boardSize, firstPlayer, rng: createRng(SEED) });
@@ -251,9 +252,9 @@ describe('illegal moves', () => {
 
 describe('Lone', () => {
   it('gives the opponent an offer of 1 once a Lone is placed', () => {
-    const state = forceOffer(newRound('2x2'), ['s.short-offer', 'r0', 'r1']);
+    const state = forceOffer(newRound('2x2'), [LONE, ROCK, PAPER]);
     const next = applyMove(state, 0, {
-      pieceId: 's.short-offer',
+      pieceId: LONE,
       cell: { column: 0, row: 0 },
     });
     expect(next.offer).toHaveLength(1);
@@ -266,7 +267,7 @@ describe('Lone', () => {
         newRound('2x2'),
         0,
         { column: 1, row: 1 },
-        { pieceId: 's.short-offer', nullified },
+        { pieceId: LONE, nullified },
       );
       const next = applyMove(base, 0, legalMoves(base)[0]!);
       expect(next.offer).toHaveLength(expected);
@@ -298,7 +299,7 @@ describe('Scout', () => {
       const cellsOf = (pieceId: string) =>
         moves.filter((move) => move.pieceId === pieceId).map((m) => m.cell);
       expect(cellsOf(scoutPiece)).toEqual(scoutCells);
-      expect(cellsOf('r1')).toHaveLength(
+      expect(cellsOf(PAPER)).toHaveLength(
         state.boards[0].filter((placed) => placed === null).length,
       );
       for (const move of moves) {
@@ -358,7 +359,7 @@ describe('skipping a player with a full board', () => {
 
   it('gives the turn to the same player again', () => {
     const next = applyMove(opponentFull(), 0, {
-      pieceId: 'r1',
+      pieceId: PAPER,
       cell: emptyCell,
     });
     expect(next.phase).toBe('placing');
@@ -373,7 +374,7 @@ describe('skipping a player with a full board', () => {
     'with %s on the full opponent board, the offer has size %i',
     (_, expected, placed) => {
       const next = applyMove(opponentFull(placed), 0, {
-        pieceId: 'r1',
+        pieceId: PAPER,
         cell: emptyCell,
       });
       expect(next.offer).toHaveLength(expected);
@@ -392,7 +393,7 @@ describe('skipping a player with a full board', () => {
 
   it('ends the round once both boards are full', () => {
     const state = withFilledBoard(opponentFull(), 0, plainPlaced, [emptyCell]);
-    const next = applyMove(state, 0, { pieceId: 'r1', cell: emptyCell });
+    const next = applyMove(state, 0, { pieceId: PAPER, cell: emptyCell });
     expect(next.phase).toBe('full');
     expect(next.currentPlayer).toBeNull();
   });
@@ -404,7 +405,7 @@ describe('Rotten and Rotten+', () => {
     ({ boardSize, pieceId, cell, nullifiedCells }) => {
       const state = withPlaced(
         withFilledBoard(
-          forceOffer(newRound(boardSize), [pieceId, 'r1', 'r2']),
+          forceOffer(newRound(boardSize), [pieceId, PAPER, SCISSORS]),
           1,
           blessedPlaced,
         ),
@@ -432,7 +433,7 @@ describe('Rotten and Rotten+', () => {
   it.each(nullifyPieces)(
     '%s leaves an empty opponent board alone and pieces placed later active',
     (pieceId) => {
-      const state = forceOffer(newRound('2x2'), [pieceId, 'r1', 'r2']);
+      const state = forceOffer(newRound('2x2'), [pieceId, PAPER, SCISSORS]);
       const after = applyMove(state, 0, {
         pieceId,
         cell: { column: 0, row: 0 },
@@ -451,7 +452,7 @@ describe('Rotten and Rotten+', () => {
     (pieceId) => {
       const state = withPlaced(
         withFilledBoard(
-          forceOffer(newRound('2x2'), [pieceId, 'r1', 'r2']),
+          forceOffer(newRound('2x2'), [pieceId, PAPER, SCISSORS]),
           1,
           plainPlaced,
         ),

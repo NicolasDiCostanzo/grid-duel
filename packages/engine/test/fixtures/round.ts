@@ -1,11 +1,21 @@
 import type { BoardSize, Cell, Placed } from '../../src/round';
+import {
+  JUST_PAPER,
+  LONE,
+  PAPER,
+  ROCK,
+  ROTTEN_PLUS,
+  ROTTEN_ROCK,
+  SCISSORS,
+  SCOUT_ROCK,
+} from './pieces';
 
-export const scoutPiece = 'r0.replace';
-export const scoutOffer: readonly string[] = [scoutPiece, 'r1', 'r2'];
-export const regularOffer: readonly string[] = ['r1', 'r2', 'r0'];
-export const plainPlaced: Placed = { pieceId: 'r1', nullified: false };
+export const scoutPiece = SCOUT_ROCK;
+export const scoutOffer: readonly string[] = [scoutPiece, PAPER, SCISSORS];
+export const regularOffer: readonly string[] = [PAPER, SCISSORS, ROCK];
+export const plainPlaced: Placed = { pieceId: PAPER, nullified: false };
 export const activeLone: Placed = {
-  pieceId: 's.short-offer',
+  pieceId: LONE,
   nullified: false,
 };
 
@@ -120,13 +130,10 @@ export const loneOfferSizes: readonly (readonly [boolean, number])[] = [
 ];
 
 export const blessedPlaced: Placed = {
-  pieceId: 'r1.tie-win',
+  pieceId: JUST_PAPER,
   nullified: false,
 };
-export const nullifyPieces: readonly string[] = [
-  'r0.nullify-row',
-  's.nullify-side',
-];
+export const nullifyPieces: readonly string[] = [ROTTEN_ROCK, ROTTEN_PLUS];
 
 export const nullifyCases: readonly {
   name: string;
@@ -138,14 +145,14 @@ export const nullifyCases: readonly {
   {
     name: '2x2 Rotten on row 0 nullifies the blessed piece of that row',
     boardSize: '2x2',
-    pieceId: 'r0.nullify-row',
+    pieceId: ROTTEN_ROCK,
     cell: { column: 1, row: 0 },
     nullifiedCells: [{ column: 0, row: 0 }],
   },
   {
     name: '2x2 Rotten on row 1 nullifies that row',
     boardSize: '2x2',
-    pieceId: 'r0.nullify-row',
+    pieceId: ROTTEN_ROCK,
     cell: { column: 1, row: 1 },
     nullifiedCells: [
       { column: 0, row: 1 },
@@ -155,7 +162,7 @@ export const nullifyCases: readonly {
   {
     name: '2x3 Rotten on row 2 nullifies that row',
     boardSize: '2x3',
-    pieceId: 'r0.nullify-row',
+    pieceId: ROTTEN_ROCK,
     cell: { column: 1, row: 2 },
     nullifiedCells: [
       { column: 0, row: 2 },
@@ -165,7 +172,7 @@ export const nullifyCases: readonly {
   {
     name: '2x2 Rotten+ nullifies every blessed piece',
     boardSize: '2x2',
-    pieceId: 's.nullify-side',
+    pieceId: ROTTEN_PLUS,
     cell: { column: 0, row: 0 },
     nullifiedCells: [
       { column: 0, row: 0 },
@@ -176,7 +183,7 @@ export const nullifyCases: readonly {
   {
     name: '2x3 Rotten+ nullifies every blessed piece',
     boardSize: '2x3',
-    pieceId: 's.nullify-side',
+    pieceId: ROTTEN_PLUS,
     cell: { column: 0, row: 0 },
     nullifiedCells: [
       { column: 0, row: 0 },

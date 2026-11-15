@@ -1,5 +1,19 @@
 import type { DuelEvent } from '../../src/moves';
 import type { BoardSize, PlayerId } from '../../src/round';
+import {
+  FALLEN_ROCK,
+  JUST_PAPER,
+  MERCENARY_PAPER,
+  MERCENARY_ROCK,
+  PAPER,
+  RISEN_ROCK,
+  ROCK,
+  SCISSORS,
+  TRICKSTER_PAPER,
+  TRICKSTER_ROCK,
+  TRICKSTER_SCISSORS,
+  WANDERING,
+} from './pieces';
 
 export type Layout = readonly [readonly string[], readonly string[]];
 
@@ -15,16 +29,13 @@ export type ShiftCase = {
   points?: readonly [number, number];
 };
 
-export const FALLEN = 'r0.shift-down';
-export const RISEN = 'r0.shift-up';
-
 export const plain2x2: Layout = [
-  ['r0', 'r2'],
-  ['r2', 'r0'],
+  [ROCK, SCISSORS],
+  [SCISSORS, ROCK],
 ];
 const plain2x3: Layout = [
-  ['r0', 'r1', 'r2'],
-  ['r2', 'r1', 'r0'],
+  [ROCK, PAPER, SCISSORS],
+  [SCISSORS, PAPER, ROCK],
 ];
 
 const scored = (player: PlayerId, amount: number): DuelEvent => ({
@@ -62,51 +73,57 @@ export const shiftCases: readonly ShiftCase[] = [
     boardSize: '2x2',
     firstPlayer: 0,
     board0: [
-      ['r2', 'r0'],
-      [FALLEN, 'r1'],
+      [SCISSORS, ROCK],
+      [FALLEN_ROCK, PAPER],
     ],
     board1: plain2x2,
     expected0: [
-      ['r2', 'r0'],
-      ['r1', FALLEN],
+      [SCISSORS, ROCK],
+      [PAPER, FALLEN_ROCK],
     ],
     expected1: plain2x2,
-    events: [moved(0, FALLEN, [1, 0], [1, 1]), moved(0, 'r1', [1, 1], [1, 0])],
+    events: [
+      moved(0, FALLEN_ROCK, [1, 0], [1, 1]),
+      moved(0, PAPER, [1, 1], [1, 0]),
+    ],
   },
   {
     name: '2x2 Risen wraps the top piece to the bottom',
     boardSize: '2x2',
     firstPlayer: 0,
     board0: [
-      [RISEN, 'r1'],
-      ['r2', 'r0'],
+      [RISEN_ROCK, PAPER],
+      [SCISSORS, ROCK],
     ],
     board1: plain2x2,
     expected0: [
-      ['r1', RISEN],
-      ['r2', 'r0'],
+      [PAPER, RISEN_ROCK],
+      [SCISSORS, ROCK],
     ],
     expected1: plain2x2,
-    events: [moved(0, RISEN, [0, 0], [0, 1]), moved(0, 'r1', [0, 1], [0, 0])],
+    events: [
+      moved(0, RISEN_ROCK, [0, 0], [0, 1]),
+      moved(0, PAPER, [0, 1], [0, 0]),
+    ],
   },
   {
     name: '2x3 Fallen moves the whole column down',
     boardSize: '2x3',
     firstPlayer: 0,
     board0: [
-      ['r0', 'r1', 'r2'],
-      ['r1', FALLEN, 'r2'],
+      [ROCK, PAPER, SCISSORS],
+      [PAPER, FALLEN_ROCK, SCISSORS],
     ],
     board1: plain2x3,
     expected0: [
-      ['r0', 'r1', 'r2'],
-      ['r2', 'r1', FALLEN],
+      [ROCK, PAPER, SCISSORS],
+      [SCISSORS, PAPER, FALLEN_ROCK],
     ],
     expected1: plain2x3,
     events: [
-      moved(0, 'r1', [1, 0], [1, 1]),
-      moved(0, FALLEN, [1, 1], [1, 2]),
-      moved(0, 'r2', [1, 2], [1, 0]),
+      moved(0, PAPER, [1, 0], [1, 1]),
+      moved(0, FALLEN_ROCK, [1, 1], [1, 2]),
+      moved(0, SCISSORS, [1, 2], [1, 0]),
     ],
   },
   {
@@ -114,19 +131,19 @@ export const shiftCases: readonly ShiftCase[] = [
     boardSize: '2x3',
     firstPlayer: 0,
     board0: [
-      ['r1', 'r2', RISEN],
-      ['r0', 'r1', 'r2'],
+      [PAPER, SCISSORS, RISEN_ROCK],
+      [ROCK, PAPER, SCISSORS],
     ],
     board1: plain2x3,
     expected0: [
-      ['r2', RISEN, 'r1'],
-      ['r0', 'r1', 'r2'],
+      [SCISSORS, RISEN_ROCK, PAPER],
+      [ROCK, PAPER, SCISSORS],
     ],
     expected1: plain2x3,
     events: [
-      moved(0, 'r1', [0, 0], [0, 2]),
-      moved(0, 'r2', [0, 1], [0, 0]),
-      moved(0, RISEN, [0, 2], [0, 1]),
+      moved(0, PAPER, [0, 0], [0, 2]),
+      moved(0, SCISSORS, [0, 1], [0, 0]),
+      moved(0, RISEN_ROCK, [0, 2], [0, 1]),
     ],
   },
   {
@@ -134,13 +151,13 @@ export const shiftCases: readonly ShiftCase[] = [
     boardSize: '2x2',
     firstPlayer: 0,
     board0: [
-      ['r2', 'r0'],
-      [`~${FALLEN}`, 'r1'],
+      [SCISSORS, ROCK],
+      [`~${FALLEN_ROCK}`, PAPER],
     ],
     board1: plain2x2,
     expected0: [
-      ['r2', 'r0'],
-      [`~${FALLEN}`, 'r1'],
+      [SCISSORS, ROCK],
+      [`~${FALLEN_ROCK}`, PAPER],
     ],
     expected1: plain2x2,
     events: [],
@@ -150,18 +167,18 @@ export const shiftCases: readonly ShiftCase[] = [
     boardSize: '2x2',
     firstPlayer: 0,
     board0: [
-      ['r2', 'r0'],
-      [FALLEN, '~r1.tie-win'],
+      [SCISSORS, ROCK],
+      [FALLEN_ROCK, `~${JUST_PAPER}`],
     ],
     board1: plain2x2,
     expected0: [
-      ['r2', 'r0'],
-      ['~r1.tie-win', FALLEN],
+      [SCISSORS, ROCK],
+      [`~${JUST_PAPER}`, FALLEN_ROCK],
     ],
     expected1: plain2x2,
     events: [
-      moved(0, FALLEN, [1, 0], [1, 1]),
-      moved(0, 'r1.tie-win', [1, 1], [1, 0]),
+      moved(0, FALLEN_ROCK, [1, 0], [1, 1]),
+      moved(0, JUST_PAPER, [1, 1], [1, 0]),
     ],
   },
   {
@@ -169,20 +186,20 @@ export const shiftCases: readonly ShiftCase[] = [
     boardSize: '2x2',
     firstPlayer: 0,
     board0: [
-      [RISEN, 'r1'],
-      ['r2', FALLEN],
+      [RISEN_ROCK, PAPER],
+      [SCISSORS, FALLEN_ROCK],
     ],
     board1: plain2x2,
     expected0: [
-      ['r1', RISEN],
-      [FALLEN, 'r2'],
+      [PAPER, RISEN_ROCK],
+      [FALLEN_ROCK, SCISSORS],
     ],
     expected1: plain2x2,
     events: [
-      moved(0, 'r2', [1, 0], [1, 1]),
-      moved(0, FALLEN, [1, 1], [1, 0]),
-      moved(0, RISEN, [0, 0], [0, 1]),
-      moved(0, 'r1', [0, 1], [0, 0]),
+      moved(0, SCISSORS, [1, 0], [1, 1]),
+      moved(0, FALLEN_ROCK, [1, 1], [1, 0]),
+      moved(0, RISEN_ROCK, [0, 0], [0, 1]),
+      moved(0, PAPER, [0, 1], [0, 0]),
     ],
   },
   {
@@ -190,22 +207,22 @@ export const shiftCases: readonly ShiftCase[] = [
     boardSize: '2x3',
     firstPlayer: 0,
     board0: [
-      ['r0', 'r1', 'r2'],
-      [RISEN, 'r1', FALLEN],
+      [ROCK, PAPER, SCISSORS],
+      [RISEN_ROCK, PAPER, FALLEN_ROCK],
     ],
     board1: plain2x3,
     expected0: [
-      ['r0', 'r1', 'r2'],
-      [RISEN, 'r1', FALLEN],
+      [ROCK, PAPER, SCISSORS],
+      [RISEN_ROCK, PAPER, FALLEN_ROCK],
     ],
     expected1: plain2x3,
     events: [
-      moved(0, RISEN, [1, 0], [1, 2]),
-      moved(0, 'r1', [1, 1], [1, 0]),
-      moved(0, FALLEN, [1, 2], [1, 1]),
-      moved(0, 'r1', [1, 0], [1, 1]),
-      moved(0, FALLEN, [1, 1], [1, 2]),
-      moved(0, RISEN, [1, 2], [1, 0]),
+      moved(0, RISEN_ROCK, [1, 0], [1, 2]),
+      moved(0, PAPER, [1, 1], [1, 0]),
+      moved(0, FALLEN_ROCK, [1, 2], [1, 1]),
+      moved(0, PAPER, [1, 0], [1, 1]),
+      moved(0, FALLEN_ROCK, [1, 1], [1, 2]),
+      moved(0, RISEN_ROCK, [1, 2], [1, 0]),
     ],
   },
   {
@@ -213,26 +230,26 @@ export const shiftCases: readonly ShiftCase[] = [
     boardSize: '2x2',
     firstPlayer: 0,
     board0: [
-      ['r0', 'r2'],
-      [FALLEN, 'r1'],
+      [ROCK, SCISSORS],
+      [FALLEN_ROCK, PAPER],
     ],
     board1: [
-      ['r0', 'r2'],
-      [FALLEN, 'r2'],
+      [ROCK, SCISSORS],
+      [FALLEN_ROCK, SCISSORS],
     ],
     expected0: [
-      ['r0', 'r2'],
-      ['r1', FALLEN],
+      [ROCK, SCISSORS],
+      [PAPER, FALLEN_ROCK],
     ],
     expected1: [
-      ['r0', 'r2'],
-      ['r2', FALLEN],
+      [ROCK, SCISSORS],
+      [SCISSORS, FALLEN_ROCK],
     ],
     events: [
-      moved(0, FALLEN, [1, 0], [1, 1]),
-      moved(0, 'r1', [1, 1], [1, 0]),
-      moved(1, FALLEN, [1, 0], [1, 1]),
-      moved(1, 'r2', [1, 1], [1, 0]),
+      moved(0, FALLEN_ROCK, [1, 0], [1, 1]),
+      moved(0, PAPER, [1, 1], [1, 0]),
+      moved(1, FALLEN_ROCK, [1, 0], [1, 1]),
+      moved(1, SCISSORS, [1, 1], [1, 0]),
     ],
   },
   {
@@ -240,33 +257,33 @@ export const shiftCases: readonly ShiftCase[] = [
     boardSize: '2x2',
     firstPlayer: 1,
     board0: [
-      ['r0', 'r2'],
-      [FALLEN, 'r1'],
+      [ROCK, SCISSORS],
+      [FALLEN_ROCK, PAPER],
     ],
     board1: [
-      ['r0', 'r2'],
-      [FALLEN, 'r2'],
+      [ROCK, SCISSORS],
+      [FALLEN_ROCK, SCISSORS],
     ],
     expected0: [
-      ['r0', 'r2'],
-      ['r1', FALLEN],
+      [ROCK, SCISSORS],
+      [PAPER, FALLEN_ROCK],
     ],
     expected1: [
-      ['r0', 'r2'],
-      ['r2', FALLEN],
+      [ROCK, SCISSORS],
+      [SCISSORS, FALLEN_ROCK],
     ],
     events: [
-      moved(1, FALLEN, [1, 0], [1, 1]),
-      moved(1, 'r2', [1, 1], [1, 0]),
-      moved(0, FALLEN, [1, 0], [1, 1]),
-      moved(0, 'r1', [1, 1], [1, 0]),
+      moved(1, FALLEN_ROCK, [1, 0], [1, 1]),
+      moved(1, SCISSORS, [1, 1], [1, 0]),
+      moved(0, FALLEN_ROCK, [1, 0], [1, 1]),
+      moved(0, PAPER, [1, 1], [1, 0]),
     ],
   },
 ];
 
 export const unresolvablePhases = ['placing', 'moved'] as const;
 
-export const MERCENARY = 'r0.swap-row';
+export const MERCENARY = MERCENARY_ROCK;
 
 export const mercenaryCases: readonly ShiftCase[] = [
   {
@@ -274,18 +291,18 @@ export const mercenaryCases: readonly ShiftCase[] = [
     boardSize: '2x2',
     firstPlayer: 0,
     board0: [
-      ['r1', 'r2'],
-      [MERCENARY, 'r0'],
+      [PAPER, SCISSORS],
+      [MERCENARY, ROCK],
     ],
     board1: plain2x2,
     expected0: [
-      [MERCENARY, 'r2'],
-      ['r1', 'r0'],
+      [MERCENARY, SCISSORS],
+      [PAPER, ROCK],
     ],
     expected1: plain2x2,
     events: [
       moved(0, MERCENARY, [1, 0], [0, 0]),
-      moved(0, 'r1', [0, 0], [1, 0]),
+      moved(0, PAPER, [0, 0], [1, 0]),
     ],
   },
   {
@@ -293,18 +310,18 @@ export const mercenaryCases: readonly ShiftCase[] = [
     boardSize: '2x2',
     firstPlayer: 0,
     board0: [
-      ['r1', MERCENARY],
-      ['r2', 'r0'],
+      [PAPER, MERCENARY],
+      [SCISSORS, ROCK],
     ],
     board1: plain2x2,
     expected0: [
-      ['r1', 'r0'],
-      ['r2', MERCENARY],
+      [PAPER, ROCK],
+      [SCISSORS, MERCENARY],
     ],
     expected1: plain2x2,
     events: [
       moved(0, MERCENARY, [0, 1], [1, 1]),
-      moved(0, 'r0', [1, 1], [0, 1]),
+      moved(0, ROCK, [1, 1], [0, 1]),
     ],
   },
   {
@@ -312,18 +329,18 @@ export const mercenaryCases: readonly ShiftCase[] = [
     boardSize: '2x3',
     firstPlayer: 0,
     board0: [
-      ['r0', 'r1', 'r2'],
-      ['r1', 'r2', MERCENARY],
+      [ROCK, PAPER, SCISSORS],
+      [PAPER, SCISSORS, MERCENARY],
     ],
     board1: plain2x3,
     expected0: [
-      ['r0', 'r1', MERCENARY],
-      ['r1', 'r2', 'r2'],
+      [ROCK, PAPER, MERCENARY],
+      [PAPER, SCISSORS, SCISSORS],
     ],
     expected1: plain2x3,
     events: [
       moved(0, MERCENARY, [1, 2], [0, 2]),
-      moved(0, 'r2', [0, 2], [1, 2]),
+      moved(0, SCISSORS, [0, 2], [1, 2]),
     ],
   },
   {
@@ -331,13 +348,13 @@ export const mercenaryCases: readonly ShiftCase[] = [
     boardSize: '2x2',
     firstPlayer: 0,
     board0: [
-      ['r1', 'r2'],
-      [`~${MERCENARY}`, 'r0'],
+      [PAPER, SCISSORS],
+      [`~${MERCENARY}`, ROCK],
     ],
     board1: plain2x2,
     expected0: [
-      ['r1', 'r2'],
-      [`~${MERCENARY}`, 'r0'],
+      [PAPER, SCISSORS],
+      [`~${MERCENARY}`, ROCK],
     ],
     expected1: plain2x2,
     events: [],
@@ -347,20 +364,20 @@ export const mercenaryCases: readonly ShiftCase[] = [
     boardSize: '2x2',
     firstPlayer: 0,
     board0: [
-      ['r1.swap-row', 'r2'],
-      ['r0.swap-row', 'r0'],
+      [MERCENARY_PAPER, SCISSORS],
+      [MERCENARY_ROCK, ROCK],
     ],
     board1: plain2x2,
     expected0: [
-      ['r1.swap-row', 'r2'],
-      ['r0.swap-row', 'r0'],
+      [MERCENARY_PAPER, SCISSORS],
+      [MERCENARY_ROCK, ROCK],
     ],
     expected1: plain2x2,
     events: [
-      moved(0, 'r0.swap-row', [1, 0], [0, 0]),
-      moved(0, 'r1.swap-row', [0, 0], [1, 0]),
-      moved(0, 'r1.swap-row', [1, 0], [0, 0]),
-      moved(0, 'r0.swap-row', [0, 0], [1, 0]),
+      moved(0, MERCENARY_ROCK, [1, 0], [0, 0]),
+      moved(0, MERCENARY_PAPER, [0, 0], [1, 0]),
+      moved(0, MERCENARY_PAPER, [1, 0], [0, 0]),
+      moved(0, MERCENARY_ROCK, [0, 0], [1, 0]),
     ],
   },
   {
@@ -368,20 +385,20 @@ export const mercenaryCases: readonly ShiftCase[] = [
     boardSize: '2x2',
     firstPlayer: 0,
     board0: [
-      ['r1', 'r2'],
-      [FALLEN, MERCENARY],
+      [PAPER, SCISSORS],
+      [FALLEN_ROCK, MERCENARY],
     ],
     board1: plain2x2,
     expected0: [
-      [MERCENARY, 'r2'],
-      ['r1', FALLEN],
+      [MERCENARY, SCISSORS],
+      [PAPER, FALLEN_ROCK],
     ],
     expected1: plain2x2,
     events: [
-      moved(0, FALLEN, [1, 0], [1, 1]),
+      moved(0, FALLEN_ROCK, [1, 0], [1, 1]),
       moved(0, MERCENARY, [1, 1], [1, 0]),
       moved(0, MERCENARY, [1, 0], [0, 0]),
-      moved(0, 'r1', [0, 0], [1, 0]),
+      moved(0, PAPER, [0, 0], [1, 0]),
     ],
   },
   {
@@ -389,33 +406,37 @@ export const mercenaryCases: readonly ShiftCase[] = [
     boardSize: '2x2',
     firstPlayer: 0,
     board0: [
-      [FALLEN, 'r1'],
-      [MERCENARY, 'r2'],
+      [FALLEN_ROCK, PAPER],
+      [MERCENARY, SCISSORS],
     ],
     board1: plain2x2,
     expected0: [
-      [MERCENARY, 'r1'],
-      ['r2', FALLEN],
+      [MERCENARY, PAPER],
+      [SCISSORS, FALLEN_ROCK],
     ],
     expected1: plain2x2,
     events: [
       moved(0, MERCENARY, [1, 0], [0, 0]),
-      moved(0, FALLEN, [0, 0], [1, 0]),
-      moved(0, FALLEN, [1, 0], [1, 1]),
-      moved(0, 'r2', [1, 1], [1, 0]),
+      moved(0, FALLEN_ROCK, [0, 0], [1, 0]),
+      moved(0, FALLEN_ROCK, [1, 0], [1, 1]),
+      moved(0, SCISSORS, [1, 1], [1, 0]),
     ],
   },
 ];
 
 export const tricksterTypes = [0, 1, 2] as const;
-export const tricksterOf = (type: number): string => `r${type}.retype`;
+const TRICKSTERS = [
+  TRICKSTER_ROCK,
+  TRICKSTER_PAPER,
+  TRICKSTER_SCISSORS,
+] as const;
+export const tricksterOf = (type: (typeof tricksterTypes)[number]): string =>
+  TRICKSTERS[type];
 export const tricksterBoard = (pieceId: string): Layout => [
-  ['r1', 'r2'],
-  [pieceId, 'r0'],
+  [PAPER, SCISSORS],
+  [pieceId, ROCK],
 ];
 export const tricksterSeedCount = 40;
-
-export const WANDERING = 's.move-points';
 
 export const wanderingCases: readonly ShiftCase[] = [
   {
@@ -423,18 +444,18 @@ export const wanderingCases: readonly ShiftCase[] = [
     boardSize: '2x2',
     firstPlayer: 0,
     board0: [
-      ['r1', 'r2'],
-      [FALLEN, WANDERING],
+      [PAPER, SCISSORS],
+      [FALLEN_ROCK, WANDERING],
     ],
     board1: plain2x2,
     expected0: [
-      ['r1', 'r2'],
-      [WANDERING, FALLEN],
+      [PAPER, SCISSORS],
+      [WANDERING, FALLEN_ROCK],
     ],
     expected1: plain2x2,
     points: [2, 0],
     events: [
-      moved(0, FALLEN, [1, 0], [1, 1]),
+      moved(0, FALLEN_ROCK, [1, 0], [1, 1]),
       moved(0, WANDERING, [1, 1], [1, 0]),
       scored(0, 2),
     ],
@@ -444,13 +465,13 @@ export const wanderingCases: readonly ShiftCase[] = [
     boardSize: '2x2',
     firstPlayer: 0,
     board0: [
-      [WANDERING, 'r1'],
-      [MERCENARY, 'r2'],
+      [WANDERING, PAPER],
+      [MERCENARY, SCISSORS],
     ],
     board1: plain2x2,
     expected0: [
-      [MERCENARY, 'r1'],
-      [WANDERING, 'r2'],
+      [MERCENARY, PAPER],
+      [WANDERING, SCISSORS],
     ],
     expected1: plain2x2,
     points: [2, 0],
@@ -465,21 +486,21 @@ export const wanderingCases: readonly ShiftCase[] = [
     boardSize: '2x3',
     firstPlayer: 0,
     board0: [
-      ['r1', WANDERING, RISEN],
-      ['r0', 'r1', 'r2'],
+      [PAPER, WANDERING, RISEN_ROCK],
+      [ROCK, PAPER, SCISSORS],
     ],
     board1: plain2x3,
     expected0: [
-      [WANDERING, RISEN, 'r1'],
-      ['r0', 'r1', 'r2'],
+      [WANDERING, RISEN_ROCK, PAPER],
+      [ROCK, PAPER, SCISSORS],
     ],
     expected1: plain2x3,
     points: [2, 0],
     events: [
-      moved(0, 'r1', [0, 0], [0, 2]),
+      moved(0, PAPER, [0, 0], [0, 2]),
       moved(0, WANDERING, [0, 1], [0, 0]),
       scored(0, 2),
-      moved(0, RISEN, [0, 2], [0, 1]),
+      moved(0, RISEN_ROCK, [0, 2], [0, 1]),
     ],
   },
   {
@@ -487,25 +508,25 @@ export const wanderingCases: readonly ShiftCase[] = [
     boardSize: '2x3',
     firstPlayer: 0,
     board0: [
-      ['r0', 'r1', 'r2'],
-      [FALLEN, RISEN, WANDERING],
+      [ROCK, PAPER, SCISSORS],
+      [FALLEN_ROCK, RISEN_ROCK, WANDERING],
     ],
     board1: plain2x3,
     expected0: [
-      ['r0', 'r1', 'r2'],
-      [FALLEN, RISEN, WANDERING],
+      [ROCK, PAPER, SCISSORS],
+      [FALLEN_ROCK, RISEN_ROCK, WANDERING],
     ],
     expected1: plain2x3,
     points: [4, 0],
     events: [
-      moved(0, FALLEN, [1, 0], [1, 1]),
-      moved(0, RISEN, [1, 1], [1, 2]),
+      moved(0, FALLEN_ROCK, [1, 0], [1, 1]),
+      moved(0, RISEN_ROCK, [1, 1], [1, 2]),
       moved(0, WANDERING, [1, 2], [1, 0]),
       scored(0, 2),
       moved(0, WANDERING, [1, 0], [1, 2]),
       scored(0, 2),
-      moved(0, FALLEN, [1, 1], [1, 0]),
-      moved(0, RISEN, [1, 2], [1, 1]),
+      moved(0, FALLEN_ROCK, [1, 1], [1, 0]),
+      moved(0, RISEN_ROCK, [1, 2], [1, 1]),
     ],
   },
   {
@@ -513,17 +534,17 @@ export const wanderingCases: readonly ShiftCase[] = [
     boardSize: '2x2',
     firstPlayer: 0,
     board0: [
-      ['r1', 'r2'],
-      [FALLEN, `~${WANDERING}`],
+      [PAPER, SCISSORS],
+      [FALLEN_ROCK, `~${WANDERING}`],
     ],
     board1: plain2x2,
     expected0: [
-      ['r1', 'r2'],
-      [`~${WANDERING}`, FALLEN],
+      [PAPER, SCISSORS],
+      [`~${WANDERING}`, FALLEN_ROCK],
     ],
     expected1: plain2x2,
     events: [
-      moved(0, FALLEN, [1, 0], [1, 1]),
+      moved(0, FALLEN_ROCK, [1, 0], [1, 1]),
       moved(0, WANDERING, [1, 1], [1, 0]),
     ],
   },
@@ -532,13 +553,13 @@ export const wanderingCases: readonly ShiftCase[] = [
     boardSize: '2x2',
     firstPlayer: 0,
     board0: [
-      [WANDERING, 'r1'],
-      ['r2', 'r0'],
+      [WANDERING, PAPER],
+      [SCISSORS, ROCK],
     ],
     board1: plain2x2,
     expected0: [
-      [WANDERING, 'r1'],
-      ['r2', 'r0'],
+      [WANDERING, PAPER],
+      [SCISSORS, ROCK],
     ],
     expected1: plain2x2,
     events: [],
@@ -549,17 +570,17 @@ export const wanderingCases: readonly ShiftCase[] = [
     firstPlayer: 0,
     board0: plain2x2,
     board1: [
-      ['r1', 'r2'],
-      [FALLEN, WANDERING],
+      [PAPER, SCISSORS],
+      [FALLEN_ROCK, WANDERING],
     ],
     expected0: plain2x2,
     expected1: [
-      ['r1', 'r2'],
-      [WANDERING, FALLEN],
+      [PAPER, SCISSORS],
+      [WANDERING, FALLEN_ROCK],
     ],
     points: [0, 2],
     events: [
-      moved(1, FALLEN, [1, 0], [1, 1]),
+      moved(1, FALLEN_ROCK, [1, 0], [1, 1]),
       moved(1, WANDERING, [1, 1], [1, 0]),
       scored(1, 2),
     ],

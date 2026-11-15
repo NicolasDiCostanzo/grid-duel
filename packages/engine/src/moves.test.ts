@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import {
-  FALLEN,
   mercenaryCases,
   plain2x2,
   shiftCases,
@@ -12,6 +11,7 @@ import {
   wanderingCases,
   type ShiftCase,
 } from '../test/fixtures/moves';
+import { FALLEN_ROCK, PAPER, ROCK, SCISSORS } from '../test/fixtures/pieces';
 import { hexSeedFor } from '../test/fixtures/round';
 import { fullState, layoutBoard } from '../test/helpers/moves';
 import { errorCode } from '../test/helpers/round';
@@ -96,7 +96,7 @@ describe('resolveMoves with a Trickster', () => {
             .boards[0][index]?.pieceId,
       ),
     );
-    expect(results).toEqual(new Set(['r1', 'r2']));
+    expect(results).toEqual(new Set([PAPER, SCISSORS]));
   });
 
   it('gives the same result for the same state', () => {
@@ -113,8 +113,8 @@ describe('resolveMoves with a Trickster', () => {
 
   it('draws once per Trickster, in sequence order', () => {
     const state = fullState('2x2', 0, tricksterBoard(tricksterOf(0)), [
-      ['r2', 'r0'],
-      ['r0', tricksterOf(1)],
+      [SCISSORS, ROCK],
+      [ROCK, tricksterOf(1)],
     ]);
     const result = resolveMoves(state);
     const rng = restoreRng(state.rngState);
@@ -138,15 +138,15 @@ describe('resolveMoves with a Trickster', () => {
       '2x2',
       0,
       [
-        ['r1', 'r2'],
-        [FALLEN, tricksterOf(0)],
+        [PAPER, SCISSORS],
+        [FALLEN_ROCK, tricksterOf(0)],
       ],
       plain2x2,
     );
     const result = resolveMoves(state);
     const placed = result.state.boards[0][index];
     expect(result.events).toEqual([
-      expect.objectContaining({ type: 'moved', pieceId: FALLEN }),
+      expect.objectContaining({ type: 'moved', pieceId: FALLEN_ROCK }),
       expect.objectContaining({ type: 'moved', pieceId: tricksterOf(0) }),
       {
         type: 'transformed',
@@ -159,6 +159,6 @@ describe('resolveMoves with a Trickster', () => {
     expect(placed?.pieceId).toMatch(/^r[12]$/);
     expect(
       result.state.boards[0][cellIndex('2x2', { column: 1, row: 1 })]?.pieceId,
-    ).toBe(FALLEN);
+    ).toBe(FALLEN_ROCK);
   });
 });
