@@ -150,3 +150,14 @@ export const randomSeeds: readonly number[] = Array.from(
 export const randomGameRounds = 6;
 export const drawnHistory: readonly RoundResult[] = ['draw', 'draw', 'draw'];
 export const drawnSeeds: readonly number[] = randomSeeds.slice(0, 40);
+
+export const publicExports = [
+  'GameError',
+  'PlacementError',
+  'applyMove',
+  'createGame',
+  'legalMoves',
+  'recordOf',
+  'replay',
+  'view',
+];

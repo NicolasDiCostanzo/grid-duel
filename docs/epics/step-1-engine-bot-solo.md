@@ -181,6 +181,15 @@ The full game loop, replay from a recorded seed, and confidence that no legal se
 - Randomised test: random legal move sequences over many seeds, both board sizes, never reach an invalid state. The harness stops a game after a fixed number of rounds and checks the state invariants at that point, so an unfinished match is allowed; a separate test checks that repeated drawn rounds keep the match unfinished and the state valid (board counts, no duplicated piece, deck consistency, round and match rules). Property-testing library choice recorded in README.md.
 - A single public engine API (create game, list legal moves, apply move, view) that solo, multiplayer and the bots will all use.
 
+### Delivered interface (used by 1.7 and later)
+Everything goes through `packages/engine/src/index.ts`; the engine's other modules are not exported.
+- `createGame({ seed, boardSize })` gives a `GameState`; `legalMoves(game)` lists the placements (empty once the match is over); `applyMove(game, player, move)` returns `{ state, events }`; `view(game, player)` is what that player may see (own deck, own offer on their turn, both boards, `results`, `wins`, `winner`; never the seed, the generator state, the opponent's deck or offer).
+- The last placement of a round resolves the effects and the duels, then starts the next round or ends the match, in the same `applyMove`. Events: `moved`, `transformed`, `duel`, `points`, `guardian`, then `round-ended` and, at the end, `match-ended`. Placements emit no event.
+- `recordOf(game)` gives `{ seed, boardSize, moves }`; `replay(record)` rebuilds the same state and events. A record is plain JSON.
+- Errors: `PlacementError` and `GameError` carry a `code`. After the match, `applyMove` throws `game-over`.
+- The catalog (piece types and effects) is not exported yet; the bots will need it and it is added in 1.7.
+- Random tests use a loop over seeds with the engine's own generator, no library (README).
+
 ### Done when
 Table-driven tests cover the match rules (2-0, 2-1, 1-1 after a draw, 2-2 continuing, a win after several drawn rounds), replay equality and the view; the randomised test passes. `npm test` passes.
 
