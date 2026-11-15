@@ -12,12 +12,13 @@ export type ShiftCase = {
   expected0: Layout;
   expected1: Layout;
   events: readonly DuelEvent[];
+  points?: readonly [number, number];
 };
 
 export const FALLEN = 'r0.shift-down';
 export const RISEN = 'r0.shift-up';
 
-const plain2x2: Layout = [
+export const plain2x2: Layout = [
   ['r0', 'r2'],
   ['r2', 'r0'],
 ];
@@ -25,6 +26,12 @@ const plain2x3: Layout = [
   ['r0', 'r1', 'r2'],
   ['r2', 'r1', 'r0'],
 ];
+
+const scored = (player: PlayerId, amount: number): DuelEvent => ({
+  type: 'points',
+  player,
+  amount,
+});
 
 const moved = (
   player: PlayerId,
@@ -258,3 +265,303 @@ export const shiftCases: readonly ShiftCase[] = [
 ];
 
 export const unresolvablePhases = ['placing', 'moved'] as const;
+
+export const MERCENARY = 'r0.swap-row';
+
+export const mercenaryCases: readonly ShiftCase[] = [
+  {
+    name: '2x2 Mercenary on the right swaps with its row neighbour',
+    boardSize: '2x2',
+    firstPlayer: 0,
+    board0: [
+      ['r1', 'r2'],
+      [MERCENARY, 'r0'],
+    ],
+    board1: plain2x2,
+    expected0: [
+      [MERCENARY, 'r2'],
+      ['r1', 'r0'],
+    ],
+    expected1: plain2x2,
+    events: [
+      moved(0, MERCENARY, [1, 0], [0, 0]),
+      moved(0, 'r1', [0, 0], [1, 0]),
+    ],
+  },
+  {
+    name: '2x2 Mercenary on the left swaps with its row neighbour',
+    boardSize: '2x2',
+    firstPlayer: 0,
+    board0: [
+      ['r1', MERCENARY],
+      ['r2', 'r0'],
+    ],
+    board1: plain2x2,
+    expected0: [
+      ['r1', 'r0'],
+      ['r2', MERCENARY],
+    ],
+    expected1: plain2x2,
+    events: [
+      moved(0, MERCENARY, [0, 1], [1, 1]),
+      moved(0, 'r0', [1, 1], [0, 1]),
+    ],
+  },
+  {
+    name: '2x3 Mercenary on the last row swaps within that row',
+    boardSize: '2x3',
+    firstPlayer: 0,
+    board0: [
+      ['r0', 'r1', 'r2'],
+      ['r1', 'r2', MERCENARY],
+    ],
+    board1: plain2x3,
+    expected0: [
+      ['r0', 'r1', MERCENARY],
+      ['r1', 'r2', 'r2'],
+    ],
+    expected1: plain2x3,
+    events: [
+      moved(0, MERCENARY, [1, 2], [0, 2]),
+      moved(0, 'r2', [0, 2], [1, 2]),
+    ],
+  },
+  {
+    name: 'a nullified Mercenary does nothing',
+    boardSize: '2x2',
+    firstPlayer: 0,
+    board0: [
+      ['r1', 'r2'],
+      [`~${MERCENARY}`, 'r0'],
+    ],
+    board1: plain2x2,
+    expected0: [
+      ['r1', 'r2'],
+      [`~${MERCENARY}`, 'r0'],
+    ],
+    expected1: plain2x2,
+    events: [],
+  },
+  {
+    name: 'two Mercenaries of one row swap, then swap back',
+    boardSize: '2x2',
+    firstPlayer: 0,
+    board0: [
+      ['r1.swap-row', 'r2'],
+      ['r0.swap-row', 'r0'],
+    ],
+    board1: plain2x2,
+    expected0: [
+      ['r1.swap-row', 'r2'],
+      ['r0.swap-row', 'r0'],
+    ],
+    expected1: plain2x2,
+    events: [
+      moved(0, 'r0.swap-row', [1, 0], [0, 0]),
+      moved(0, 'r1.swap-row', [0, 0], [1, 0]),
+      moved(0, 'r1.swap-row', [1, 0], [0, 0]),
+      moved(0, 'r0.swap-row', [0, 0], [1, 0]),
+    ],
+  },
+  {
+    name: 'a Mercenary shifted earlier swaps from its current cell',
+    boardSize: '2x2',
+    firstPlayer: 0,
+    board0: [
+      ['r1', 'r2'],
+      [FALLEN, MERCENARY],
+    ],
+    board1: plain2x2,
+    expected0: [
+      [MERCENARY, 'r2'],
+      ['r1', FALLEN],
+    ],
+    expected1: plain2x2,
+    events: [
+      moved(0, FALLEN, [1, 0], [1, 1]),
+      moved(0, MERCENARY, [1, 1], [1, 0]),
+      moved(0, MERCENARY, [1, 0], [0, 0]),
+      moved(0, 'r1', [0, 0], [1, 0]),
+    ],
+  },
+  {
+    name: 'a Fallen swapped by a Mercenary acts once, from its new column',
+    boardSize: '2x2',
+    firstPlayer: 0,
+    board0: [
+      [FALLEN, 'r1'],
+      [MERCENARY, 'r2'],
+    ],
+    board1: plain2x2,
+    expected0: [
+      [MERCENARY, 'r1'],
+      ['r2', FALLEN],
+    ],
+    expected1: plain2x2,
+    events: [
+      moved(0, MERCENARY, [1, 0], [0, 0]),
+      moved(0, FALLEN, [0, 0], [1, 0]),
+      moved(0, FALLEN, [1, 0], [1, 1]),
+      moved(0, 'r2', [1, 1], [1, 0]),
+    ],
+  },
+];
+
+export const tricksterTypes = [0, 1, 2] as const;
+export const tricksterOf = (type: number): string => `r${type}.retype`;
+export const tricksterBoard = (pieceId: string): Layout => [
+  ['r1', 'r2'],
+  [pieceId, 'r0'],
+];
+export const tricksterSeedCount = 40;
+
+export const WANDERING = 's.move-points';
+
+export const wanderingCases: readonly ShiftCase[] = [
+  {
+    name: 'a Wandering Shepherd moved by a Fallen earns 2 points',
+    boardSize: '2x2',
+    firstPlayer: 0,
+    board0: [
+      ['r1', 'r2'],
+      [FALLEN, WANDERING],
+    ],
+    board1: plain2x2,
+    expected0: [
+      ['r1', 'r2'],
+      [WANDERING, FALLEN],
+    ],
+    expected1: plain2x2,
+    points: [2, 0],
+    events: [
+      moved(0, FALLEN, [1, 0], [1, 1]),
+      moved(0, WANDERING, [1, 1], [1, 0]),
+      scored(0, 2),
+    ],
+  },
+  {
+    name: 'a Wandering Shepherd swapped by a Mercenary earns 2 points',
+    boardSize: '2x2',
+    firstPlayer: 0,
+    board0: [
+      [WANDERING, 'r1'],
+      [MERCENARY, 'r2'],
+    ],
+    board1: plain2x2,
+    expected0: [
+      [MERCENARY, 'r1'],
+      [WANDERING, 'r2'],
+    ],
+    expected1: plain2x2,
+    points: [2, 0],
+    events: [
+      moved(0, MERCENARY, [1, 0], [0, 0]),
+      moved(0, WANDERING, [0, 0], [1, 0]),
+      scored(0, 2),
+    ],
+  },
+  {
+    name: 'the points come right after the move that earned them',
+    boardSize: '2x3',
+    firstPlayer: 0,
+    board0: [
+      ['r1', WANDERING, RISEN],
+      ['r0', 'r1', 'r2'],
+    ],
+    board1: plain2x3,
+    expected0: [
+      [WANDERING, RISEN, 'r1'],
+      ['r0', 'r1', 'r2'],
+    ],
+    expected1: plain2x3,
+    points: [2, 0],
+    events: [
+      moved(0, 'r1', [0, 0], [0, 2]),
+      moved(0, WANDERING, [0, 1], [0, 0]),
+      scored(0, 2),
+      moved(0, RISEN, [0, 2], [0, 1]),
+    ],
+  },
+  {
+    name: 'a Wandering Shepherd earns 2 points for each move',
+    boardSize: '2x3',
+    firstPlayer: 0,
+    board0: [
+      ['r0', 'r1', 'r2'],
+      [FALLEN, RISEN, WANDERING],
+    ],
+    board1: plain2x3,
+    expected0: [
+      ['r0', 'r1', 'r2'],
+      [FALLEN, RISEN, WANDERING],
+    ],
+    expected1: plain2x3,
+    points: [4, 0],
+    events: [
+      moved(0, FALLEN, [1, 0], [1, 1]),
+      moved(0, RISEN, [1, 1], [1, 2]),
+      moved(0, WANDERING, [1, 2], [1, 0]),
+      scored(0, 2),
+      moved(0, WANDERING, [1, 0], [1, 2]),
+      scored(0, 2),
+      moved(0, FALLEN, [1, 1], [1, 0]),
+      moved(0, RISEN, [1, 2], [1, 1]),
+    ],
+  },
+  {
+    name: 'a nullified Wandering Shepherd earns nothing',
+    boardSize: '2x2',
+    firstPlayer: 0,
+    board0: [
+      ['r1', 'r2'],
+      [FALLEN, `~${WANDERING}`],
+    ],
+    board1: plain2x2,
+    expected0: [
+      ['r1', 'r2'],
+      [`~${WANDERING}`, FALLEN],
+    ],
+    expected1: plain2x2,
+    events: [
+      moved(0, FALLEN, [1, 0], [1, 1]),
+      moved(0, WANDERING, [1, 1], [1, 0]),
+    ],
+  },
+  {
+    name: 'a Wandering Shepherd that does not move earns nothing',
+    boardSize: '2x2',
+    firstPlayer: 0,
+    board0: [
+      [WANDERING, 'r1'],
+      ['r2', 'r0'],
+    ],
+    board1: plain2x2,
+    expected0: [
+      [WANDERING, 'r1'],
+      ['r2', 'r0'],
+    ],
+    expected1: plain2x2,
+    events: [],
+  },
+  {
+    name: 'the points go to the player whose board the Shepherd sits on',
+    boardSize: '2x2',
+    firstPlayer: 0,
+    board0: plain2x2,
+    board1: [
+      ['r1', 'r2'],
+      [FALLEN, WANDERING],
+    ],
+    expected0: plain2x2,
+    expected1: [
+      ['r1', 'r2'],
+      [WANDERING, FALLEN],
+    ],
+    points: [0, 2],
+    events: [
+      moved(1, FALLEN, [1, 0], [1, 1]),
+      moved(1, WANDERING, [1, 1], [1, 0]),
+      scored(1, 2),
+    ],
+  },
+];

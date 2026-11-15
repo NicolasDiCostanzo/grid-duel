@@ -102,6 +102,7 @@ describe('createRound', () => {
     const state = newRound(boardSize);
     expect(state.boardSize).toBe(boardSize);
     expect(state.phase).toBe('placing');
+    expect(state.points).toEqual([0, 0]);
     expect(state.currentPlayer).toBe(0);
     expect(state.boards).toHaveLength(2);
     for (const board of state.boards) {
