@@ -1,11 +1,11 @@
 #!/bin/sh
-git diff --cached --quiet --diff-filter=ACM && exit 0
+git diff --cached --quiet --diff-filter=ACMR && exit 0
 
 root=$(git rev-parse --show-toplevel)
 tmp=$(mktemp -d) || exit 1
 trap 'rm -rf "$tmp"' EXIT
 git checkout-index --all --prefix="$tmp/"
 
-git diff --cached --name-only --diff-filter=ACM -z |
+git diff --cached --name-only --diff-filter=ACMR -z |
   (cd "$tmp" && xargs -0 "$root/node_modules/.bin/prettier" --check --ignore-unknown) ||
   { echo "Formatting check failed: run 'npm run format', re-stage, then commit again." >&2; exit 1; }
