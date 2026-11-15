@@ -2,12 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { SEED } from '../test/fixtures/rng';
 import {
   activeLone,
+  blessedPlaced,
   boardSizes,
   cellIndexes,
   firstPlayerSeedCount,
   hexSeedFor,
   invalidCells,
   loneOfferSizes,
+  nullifyCases,
+  nullifyPieces,
   plainPlaced,
   publicViewKeys,
   regularOffer,
@@ -387,6 +390,78 @@ describe('skipping a player with a full board', () => {
     expect(next.phase).toBe('full');
     expect(next.currentPlayer).toBeNull();
   });
+});
+
+describe('Rotten and Rotten+', () => {
+  it.each(nullifyCases)(
+    '$name',
+    ({ boardSize, pieceId, cell, nullifiedCells }) => {
+      const state = withPlaced(
+        withFilledBoard(
+          forceOffer(newRound(boardSize), [pieceId, 'r1', 'r2']),
+          1,
+          blessedPlaced,
+        ),
+        1,
+        { column: 1, row: 0 },
+        plainPlaced,
+      );
+      const next = applyMove(state, 0, { pieceId, cell });
+      const nullifiedIndexes = nullifiedCells.map((target) =>
+        cellIndex(boardSize, target),
+      );
+      expect(next.boards[1]).toEqual(
+        state.boards[1].map((placed, index) =>
+          nullifiedIndexes.includes(index)
+            ? { ...placed, nullified: true }
+            : placed,
+        ),
+      );
+      expect(next.boards[0].filter((placed) => placed !== null)).toEqual([
+        { pieceId, nullified: false },
+      ]);
+    },
+  );
+
+  it.each(nullifyPieces)(
+    '%s leaves an empty opponent board alone and pieces placed later active',
+    (pieceId) => {
+      const state = forceOffer(newRound('2x2'), [pieceId, 'r1', 'r2']);
+      const after = applyMove(state, 0, {
+        pieceId,
+        cell: { column: 0, row: 0 },
+      });
+      expect(after.boards[1]).toEqual(state.boards[1]);
+      const next = applyMove(forceOffer(after, [blessedPlaced.pieceId]), 1, {
+        pieceId: blessedPlaced.pieceId,
+        cell: { column: 0, row: 0 },
+      });
+      expect(pieceAt(next, 1, { column: 0, row: 0 })).toEqual(blessedPlaced);
+    },
+  );
+
+  it.each(nullifyPieces)(
+    '%s nullifies an enemy Lone, so it no longer shortens the offer',
+    (pieceId) => {
+      const state = withPlaced(
+        withFilledBoard(
+          forceOffer(newRound('2x2'), [pieceId, 'r1', 'r2']),
+          1,
+          plainPlaced,
+        ),
+        1,
+        { column: 0, row: 0 },
+        activeLone,
+      );
+      const next = applyMove(state, 0, {
+        pieceId,
+        cell: { column: 0, row: 0 },
+      });
+      expect(pieceAt(next, 1, { column: 0, row: 0 })?.nullified).toBe(true);
+      expect(next.currentPlayer).toBe(0);
+      expect(next.offer).toHaveLength(3);
+    },
+  );
 });
 
 describe('playerView', () => {

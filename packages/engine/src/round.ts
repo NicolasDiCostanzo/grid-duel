@@ -71,6 +71,34 @@ const isFull = (board: Board): boolean =>
 const hasPiece = (board: Board): boolean =>
   board.some((placed) => placed !== null);
 
+const nullifiedRows = (
+  pieceId: string,
+  cell: Cell,
+  boardSize: BoardSize,
+): readonly number[] => {
+  const { effect } = getPiece(pieceId);
+  if (effect === 'nullify-row') {
+    return [cell.row];
+  }
+  if (effect === 'nullify-side') {
+    return Array.from({ length: ROWS[boardSize] }, (_, row) => row);
+  }
+  return [];
+};
+
+const nullifyRows = (
+  board: Board,
+  boardSize: BoardSize,
+  rows: readonly number[],
+): Board =>
+  board.map((placed, index) =>
+    placed !== null &&
+    rows.includes(index % ROWS[boardSize]) &&
+    getPiece(placed.pieceId).effect !== null
+      ? { ...placed, nullified: true }
+      : placed,
+  );
+
 const withPlayer = <T>(
   pair: readonly [T, T],
   player: PlayerId,
@@ -166,7 +194,16 @@ export function applyMove(
     pieceId: move.pieceId,
     nullified: false,
   });
-  const boards = withPlayer(state.boards, target, board);
+  const placedBoards = withPlayer(state.boards, target, board);
+  const boards = withPlayer(
+    placedBoards,
+    opponent,
+    nullifyRows(
+      placedBoards[opponent],
+      state.boardSize,
+      nullifiedRows(move.pieceId, move.cell, state.boardSize),
+    ),
+  );
   const decks = withPlayer(
     state.decks,
     player,

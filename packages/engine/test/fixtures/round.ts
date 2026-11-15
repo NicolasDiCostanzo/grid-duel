@@ -118,3 +118,72 @@ export const loneOfferSizes: readonly (readonly [boolean, number])[] = [
   [false, 1],
   [true, 3],
 ];
+
+export const blessedPlaced: Placed = {
+  pieceId: 'r1.tie-win',
+  nullified: false,
+};
+export const nullifyPieces: readonly string[] = [
+  'r0.nullify-row',
+  's.nullify-side',
+];
+
+export const nullifyCases: readonly {
+  name: string;
+  boardSize: BoardSize;
+  pieceId: string;
+  cell: Cell;
+  nullifiedCells: readonly Cell[];
+}[] = [
+  {
+    name: '2x2 Rotten on row 0 nullifies the blessed piece of that row',
+    boardSize: '2x2',
+    pieceId: 'r0.nullify-row',
+    cell: { column: 1, row: 0 },
+    nullifiedCells: [{ column: 0, row: 0 }],
+  },
+  {
+    name: '2x2 Rotten on row 1 nullifies that row',
+    boardSize: '2x2',
+    pieceId: 'r0.nullify-row',
+    cell: { column: 1, row: 1 },
+    nullifiedCells: [
+      { column: 0, row: 1 },
+      { column: 1, row: 1 },
+    ],
+  },
+  {
+    name: '2x3 Rotten on row 2 nullifies that row',
+    boardSize: '2x3',
+    pieceId: 'r0.nullify-row',
+    cell: { column: 1, row: 2 },
+    nullifiedCells: [
+      { column: 0, row: 2 },
+      { column: 1, row: 2 },
+    ],
+  },
+  {
+    name: '2x2 Rotten+ nullifies every blessed piece',
+    boardSize: '2x2',
+    pieceId: 's.nullify-side',
+    cell: { column: 0, row: 0 },
+    nullifiedCells: [
+      { column: 0, row: 0 },
+      { column: 0, row: 1 },
+      { column: 1, row: 1 },
+    ],
+  },
+  {
+    name: '2x3 Rotten+ nullifies every blessed piece',
+    boardSize: '2x3',
+    pieceId: 's.nullify-side',
+    cell: { column: 0, row: 0 },
+    nullifiedCells: [
+      { column: 0, row: 0 },
+      { column: 0, row: 1 },
+      { column: 0, row: 2 },
+      { column: 1, row: 1 },
+      { column: 1, row: 2 },
+    ],
+  },
+];
