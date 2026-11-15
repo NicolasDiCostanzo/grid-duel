@@ -31,3 +31,4 @@ The engine follows `docs/reference/flockade-rules.md` (copy of the original wiki
 - Wandering: it earns 2 points for each move of the piece, whatever moved it (Fallen, Risen or Mercenary swap), for the player whose board it sits on. The points are added to the round score in the effects phase. A nullified Wandering earns nothing.
 - Rotten and Rotten+: they nullify blessings only at the moment they are placed. Pieces placed on that side afterwards keep their blessing.
 - Just: it wins the tie against a piece of its own type, whatever that piece's blessing. Two Just pieces of the same type tie. A nullified Just is a plain piece.
+- Duels: once the effects phase is over, the pairs are resolved in sequence order (right column first, top to bottom, then the left column). A won duel gives 1 point and a tie gives none. The round score starts with the points earned in the effects phase. The round winner has the most points, and equal points make a drawn round.

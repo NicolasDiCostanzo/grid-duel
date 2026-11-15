@@ -34,6 +34,7 @@ export type DuelEvent =
       from: string;
       to: string;
     }
+  | { type: 'duel'; cell: Cell; winner: PlayerId | null }
   | { type: 'points'; player: PlayerId; amount: number };
 
 export type MovesErrorCode = 'not-full';
@@ -71,7 +72,7 @@ const RELOCATIONS: Partial<
   'swap-row': swapRow,
 };
 
-const sequence = (boardSize: BoardSize): Cell[] =>
+export const sequence = (boardSize: BoardSize): Cell[] =>
   ([1, 0] as const).flatMap((column) =>
     Array.from({ length: ROWS[boardSize] }, (_, row) => ({ column, row })),
   );
