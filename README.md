@@ -20,7 +20,7 @@ Requires Node 24 (see `.nvmrc`) and npm.
 
 Continuous integration (`.github/workflows/ci.yml`) runs the format check, lint and tests on every pull request and on every push to `main`.
 
-Git hooks live in `.githooks/` and `npm install` enables them: `pre-commit` checks the formatting of staged files, `pre-push` runs the same checks as CI. `git commit --no-verify` and `git push --no-verify` skip them; CI and the ruleset on `main` stay the real gate.
+Git hooks live in `.githooks/` and `npm install` enables them: `pre-commit` checks the formatting of staged files, `pre-push` refuses a dirty working tree, then runs the same checks as CI. `npm install` leaves an existing `core.hooksPath` unchanged. `git commit --no-verify` and `git push --no-verify` skip them; CI and the ruleset on `main` stay the real gate.
 
 ## Packages
 

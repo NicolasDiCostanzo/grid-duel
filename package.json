@@ -18,7 +18,7 @@
     "lint": "eslint . && npm run typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "git config core.hooksPath .githooks"
+    "prepare": "sh scripts/setup-hooks.sh"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
