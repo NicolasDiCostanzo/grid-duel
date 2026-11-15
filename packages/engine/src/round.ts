@@ -8,12 +8,13 @@ export type Cell = { column: 0 | 1; row: number };
 export type Placed = { pieceId: string; nullified: boolean };
 export type Board = readonly (Placed | null)[];
 export type Move = { pieceId: string; cell: Cell };
-export type RoundPhase = 'placing' | 'full';
+export type RoundPhase = 'placing' | 'full' | 'moved';
 
 export type RoundState = {
   boardSize: BoardSize;
   boards: readonly [Board, Board];
   decks: readonly [Deck, Deck];
+  firstPlayer: PlayerId;
   currentPlayer: PlayerId | null;
   offer: readonly string[];
   phase: RoundPhase;
@@ -44,10 +45,11 @@ export class PlacementError extends Error {
   }
 }
 
-const ROWS: Record<BoardSize, number> = { '2x2': 2, '2x3': 3 };
+export const ROWS: Record<BoardSize, number> = { '2x2': 2, '2x3': 3 };
 const COLUMNS = [0, 1] as const;
 
-const otherPlayer = (player: PlayerId): PlayerId => (player === 0 ? 1 : 0);
+export const otherPlayer = (player: PlayerId): PlayerId =>
+  player === 0 ? 1 : 0;
 
 const allCells = (boardSize: BoardSize): Cell[] =>
   COLUMNS.flatMap((column) =>
@@ -99,7 +101,7 @@ const nullifyRows = (
       : placed,
   );
 
-const withPlayer = <T>(
+export const withPlayer = <T>(
   pair: readonly [T, T],
   player: PlayerId,
   value: T,
@@ -140,6 +142,7 @@ export function createRound(options: {
     boardSize,
     boards: [emptyBoard, emptyBoard],
     decks,
+    firstPlayer,
     currentPlayer: firstPlayer,
     offer: drawOffer(decks[firstPlayer], offerSize(false), rng),
     phase: 'placing',

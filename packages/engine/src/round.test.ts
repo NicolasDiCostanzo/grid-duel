@@ -116,9 +116,14 @@ describe('createRound', () => {
     }
   });
 
-  it('gives the first turn to the chosen first player', () => {
-    expect(newRound('2x2', 1).currentPlayer).toBe(1);
-  });
+  it.each([0, 1] as const)(
+    'gives the first turn to the chosen first player %i and remembers them',
+    (firstPlayer) => {
+      const state = newRound('2x2', firstPlayer);
+      expect(state.currentPlayer).toBe(firstPlayer);
+      expect(state.firstPlayer).toBe(firstPlayer);
+    },
+  );
 });
 
 describe('legalMoves', () => {
