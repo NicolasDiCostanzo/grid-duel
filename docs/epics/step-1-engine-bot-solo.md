@@ -79,9 +79,8 @@ The placement phase of one round as a pure state machine: a state plus a legal m
 - Rotten: when placed, blessings on the opposite row are nullified. Rotten+ (Shepherd): when placed, blessings of all the opponent's pieces are nullified. Pieces placed later keep their blessing (RULES.md). A nullified Shepherd becomes the plain Shepherd state (no effect).
 - Per-player view: the opponent's deck and offers are hidden.
 
-### Open rule questions (not validated: ask the user before writing tests)
-1. Layout: the two boards face each other and a duel pairs cells in the same position; "opposite row" for Rotten is the opponent's row facing the Rotten's row. Proposed default.
-2. A Scout replacing a piece counts as that turn's placement. Proposed default.
+### Rule decisions (RULES.md)
+Layout, the facing row for Rotten, the duel start and the Scout taking the enemy cell are decided. Still open for the Scout step (ask the user before writing its tests): what the placer's own facing cell and the duel at that slot become, how turns continue when one board is already full, and whether the Scout counts as the turn's placement (proposed: yes).
 
 ### Done when
 Table-driven tests with fixtures cover each behaviour, both board sizes and each kind of illegal move. `npm test` passes.
