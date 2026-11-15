@@ -7,6 +7,10 @@ updates:
       interval: weekly
     commit-message:
       prefix: chore(deps)
+    ignore:
+      # typescript-eslint peer range is <6.1.0; drop once it supports TypeScript 7
+      - dependency-name: typescript
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: /
