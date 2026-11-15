@@ -30,3 +30,4 @@ The engine follows `docs/reference/flockade-rules.md` (copy of the original wiki
 - Trickster, resolution: each active Trickster makes one draw of the game's seeded generator at its place in the sequence, and a nullified Trickster makes none. It stays on its cell, becomes a plain piece and does not act again.
 - Wandering: it earns 2 points for each move of the piece, whatever moved it (Fallen, Risen or Mercenary swap), for the player whose board it sits on. The points are added to the round score in the effects phase. A nullified Wandering earns nothing.
 - Rotten and Rotten+: they nullify blessings only at the moment they are placed. Pieces placed on that side afterwards keep their blessing.
+- Just: it wins the tie against a piece of its own type, whatever that piece's blessing. Two Just pieces of the same type tie. A nullified Just is a plain piece.

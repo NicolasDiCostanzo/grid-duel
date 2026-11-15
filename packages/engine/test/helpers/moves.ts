@@ -10,7 +10,7 @@ import {
 import { SEED } from '../fixtures/rng';
 import type { Layout } from '../fixtures/moves';
 
-const parsePlaced = (entry: string): Placed =>
+export const parsePlaced = (entry: string): Placed =>
   entry.startsWith('~')
     ? { pieceId: entry.slice(1), nullified: true }
     : { pieceId: entry, nullified: false };
