@@ -480,10 +480,13 @@ describe('playerView', () => {
     expect(playerView(state, 1).offer).toBeNull();
   });
 
-  it('shows both boards and the own deck', () => {
+  it('shows both boards and the own deck in sorted order', () => {
     const state = playFirstLegalMove(newRound('2x2'));
     const view = playerView(state, 1);
+    const shuffled = [...state.decks[1]];
     expect(view.boards).toEqual(state.boards);
-    expect(view.deck).toEqual(state.decks[1]);
+    expect(view.deck).toEqual(shuffled.toSorted());
+    expect(view.deck).not.toEqual(shuffled);
+    expect(state.decks[1]).toEqual(shuffled);
   });
 });

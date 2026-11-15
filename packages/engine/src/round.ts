@@ -243,7 +243,7 @@ export function playerView(state: RoundState, player: PlayerId): PlayerView {
     boardSize: state.boardSize,
     boards: state.boards,
     currentPlayer: state.currentPlayer,
-    deck: state.decks[player],
+    deck: state.decks[player].toSorted(),
     offer: state.currentPlayer === player ? state.offer : null,
     phase: state.phase,
     player,
