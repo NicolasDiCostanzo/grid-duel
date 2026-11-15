@@ -35,6 +35,7 @@ export type DuelEvent =
       to: string;
     }
   | { type: 'duel'; cell: Cell; winner: PlayerId | null }
+  | { type: 'guardian'; player: PlayerId }
   | { type: 'points'; player: PlayerId; amount: number };
 
 export type MovesErrorCode = 'not-full';

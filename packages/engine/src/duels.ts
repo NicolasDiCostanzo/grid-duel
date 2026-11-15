@@ -40,6 +40,13 @@ const placedAt = (board: Board, index: number): Placed => {
   return placed;
 };
 
+const guardianOwner = (pieces: readonly [Placed, Placed]): PlayerId | null =>
+  ([0, 1] as const).find(
+    (player) =>
+      activeEffect(pieces[player]) === 'round-win-vs-marked' &&
+      activeEffect(pieces[otherPlayer(player)]) === 'drain',
+  ) ?? null;
+
 const WINNERS: Record<Outcome, PlayerId | null> = {
   win: 0,
   lose: 1,
@@ -70,6 +77,17 @@ export function resolveDuels(state: RoundState): {
       placedAt(state.boards[0], index),
       placedAt(state.boards[1], index),
     ] as const;
+    const guardian = guardianOwner(pieces);
+    if (guardian !== null) {
+      events.push(
+        { type: 'duel', cell, winner: guardian },
+        { type: 'guardian', player: guardian },
+      );
+      return {
+        state: { ...state, points, phase: 'resolved', winner: guardian },
+        events,
+      };
+    }
     const winner = WINNERS[duelOutcome(pieces[0], pieces[1])];
     events.push({ type: 'duel', cell, winner });
     if (winner === null) {

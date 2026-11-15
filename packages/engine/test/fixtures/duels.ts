@@ -6,9 +6,12 @@ import {
   FALLEN_ROCK,
   FALSE,
   GOLDEN,
+  GUARDIAN,
   JUST_ROCK,
   LONE,
+  MARKED_PAPER,
   MARKED_ROCK,
+  MARKED_SCISSORS,
   PAPER,
   PRIZE_ROCK,
   ROCK,
@@ -412,5 +415,164 @@ const pointInputs: readonly PointCase[] = [
 ];
 
 export const pointCases: readonly DuelCase[] = pointInputs.map(pointCase);
+
+const guardianWins = (player: PlayerId): DuelEvent => ({
+  type: 'guardian',
+  player,
+});
+
+const guardianInputs: readonly PointCase[] = [
+  {
+    name: 'a Guardian facing a nullified Marked does not trigger',
+    c00: [GUARDIAN, `~${MARKED_ROCK}`],
+    points: [0, 1],
+    winner: 1,
+    events: [duel(0, 0, 1), changed(1, 1)],
+  },
+  {
+    name: 'a nullified Guardian facing a Marked does not trigger',
+    c00: [`~${GUARDIAN}`, MARKED_ROCK],
+    points: [0, 1],
+    winner: 1,
+    events: [duel(0, 0, 1), changed(1, 1)],
+  },
+  {
+    name: 'a Guardian facing a piece that is not Marked loses normally',
+    c00: [GUARDIAN, ROCK],
+    points: [0, 1],
+    winner: 1,
+    events: [duel(0, 0, 1), changed(1, 1)],
+  },
+];
+
+export const guardianCases: readonly DuelCase[] = [
+  {
+    name: 'a Guardian of player 0 facing a Marked wins the round at once',
+    boardSize: '2x2',
+    board0: [
+      [GUARDIAN, SCISSORS],
+      [SCISSORS, ROCK],
+    ],
+    board1: [
+      [MARKED_ROCK, SCISSORS],
+      [SCISSORS, ROCK],
+    ],
+    points: [0, 0],
+    winner: 0,
+    events: [
+      duel(1, 0, null),
+      duel(1, 1, null),
+      duel(0, 0, 0),
+      guardianWins(0),
+    ],
+  },
+  {
+    name: 'a Guardian of player 1 facing a Marked wins the round at once',
+    boardSize: '2x2',
+    board0: [
+      [MARKED_ROCK, SCISSORS],
+      [SCISSORS, ROCK],
+    ],
+    board1: [
+      [GUARDIAN, SCISSORS],
+      [SCISSORS, ROCK],
+    ],
+    points: [0, 0],
+    winner: 1,
+    events: [
+      duel(1, 0, null),
+      duel(1, 1, null),
+      duel(0, 0, 1),
+      guardianWins(1),
+    ],
+  },
+  {
+    name: 'a Guardian wins the round while behind and keeps the score as it was',
+    boardSize: '2x2',
+    board0: [
+      [GUARDIAN, SCISSORS],
+      [ROCK, ROCK],
+    ],
+    board1: [
+      [MARKED_ROCK, SCISSORS],
+      [PAPER, ROCK],
+    ],
+    points: [0, 1],
+    winner: 0,
+    events: [
+      duel(1, 0, 1),
+      changed(1, 1),
+      duel(1, 1, null),
+      duel(0, 0, 0),
+      guardianWins(0),
+    ],
+  },
+  {
+    name: 'a Guardian triggers on a Marked of any type',
+    boardSize: '2x2',
+    board0: [
+      [GUARDIAN, SCISSORS],
+      [SCISSORS, ROCK],
+    ],
+    board1: [
+      [MARKED_SCISSORS, SCISSORS],
+      [SCISSORS, ROCK],
+    ],
+    points: [0, 0],
+    winner: 0,
+    events: [
+      duel(1, 0, null),
+      duel(1, 1, null),
+      duel(0, 0, 0),
+      guardianWins(0),
+    ],
+  },
+  {
+    name: 'with two Guardians the first trigger in sequence order wins (player 0)',
+    boardSize: '2x2',
+    board0: [
+      [MARKED_ROCK, SCISSORS],
+      [GUARDIAN, ROCK],
+    ],
+    board1: [
+      [GUARDIAN, SCISSORS],
+      [MARKED_ROCK, ROCK],
+    ],
+    points: [0, 0],
+    winner: 0,
+    events: [duel(1, 0, 0), guardianWins(0)],
+  },
+  {
+    name: 'with two Guardians the first trigger in sequence order wins (player 1)',
+    boardSize: '2x2',
+    board0: [
+      [GUARDIAN, SCISSORS],
+      [MARKED_ROCK, ROCK],
+    ],
+    board1: [
+      [MARKED_ROCK, SCISSORS],
+      [GUARDIAN, ROCK],
+    ],
+    points: [0, 0],
+    winner: 1,
+    events: [duel(1, 0, 1), guardianWins(1)],
+  },
+  {
+    name: '2x3 a Guardian stops the remaining duels',
+    boardSize: '2x3',
+    board0: [
+      [ROCK, PAPER, SCISSORS],
+      [ROCK, GUARDIAN, SCISSORS],
+    ],
+    board1: [
+      [ROCK, PAPER, SCISSORS],
+      [ROCK, MARKED_PAPER, SCISSORS],
+    ],
+    points: [0, 0],
+    winner: 0,
+    events: [duel(1, 0, null), duel(1, 1, 0), guardianWins(0)],
+  },
+  ...guardianInputs.map(pointCase),
+];
 
 export const unduelablePhases = ['placing', 'full', 'resolved'] as const;
