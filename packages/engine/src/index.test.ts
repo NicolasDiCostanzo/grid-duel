@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { maxMovesPerGame, publicExports } from '../test/fixtures/game';
+import { ROCK, SCISSORS } from '../test/fixtures/pieces';
 import { boardSizes, hexSeedFor } from '../test/fixtures/round';
 import * as engine from './index';
 import type {
@@ -11,10 +12,13 @@ import type {
   GameState,
   GameView,
   Move,
+  Outcome,
+  Piece,
   Placed,
   PlacementErrorCode,
   PlayerId,
   RecordedMove,
+  Rng,
   RoundResult,
 } from './index';
 
@@ -27,10 +31,13 @@ type PublicTypes = [
   GameState,
   GameView,
   Move,
+  Outcome,
+  Piece,
   Placed,
   PlacementErrorCode,
   PlayerId,
   RecordedMove,
+  Rng,
   RoundResult,
 ];
 
@@ -42,6 +49,18 @@ describe('the package entry point', () => {
   it('exports the types the clients need', () => {
     const types: PublicTypes | undefined = undefined;
     expect(types).toBeUndefined();
+  });
+
+  it('exposes the piece data and the seeded generator', () => {
+    const outcome: Outcome = engine.compareTypes(
+      engine.getPiece(ROCK),
+      engine.getPiece(SCISSORS),
+    );
+    expect(outcome).toBe('win');
+    const draw = (rng: Rng) => [rng.nextFloat(), rng.nextInt(10)];
+    expect(draw(engine.createRng(hexSeedFor(1)))).toEqual(
+      draw(engine.createRng(hexSeedFor(1))),
+    );
   });
 
   it.each(boardSizes)(

@@ -138,6 +138,7 @@ export const replayStops = [0, 1, 7, 30, maxMovesPerGame] as const;
 
 export const gameViewKeys = [
   ...publicViewKeys,
+  'moves',
   'results',
   'wins',
   'winner',
@@ -155,7 +156,10 @@ export const publicExports = [
   'GameError',
   'PlacementError',
   'applyMove',
+  'compareTypes',
   'createGame',
+  'createRng',
+  'getPiece',
   'legalMoves',
   'recordOf',
   'replay',

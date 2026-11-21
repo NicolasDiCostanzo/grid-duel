@@ -225,13 +225,16 @@ describe('view', () => {
   ] as const;
   const players = [0, 1] as const;
 
-  it.each(
-    states.flatMap(([name, game]) =>
-      players.map((player) => [name, game, player] as const),
-    ),
-  )('exposes only public keys in %s for player %i', (_name, game, player) => {
-    expect(Object.keys(view(game, player)).toSorted()).toEqual(gameViewKeys);
-  });
+  const statePlayers = states.flatMap(([name, game]) =>
+    players.map((player) => ({ name, game, player })),
+  );
+
+  it.each(statePlayers)(
+    'exposes only public keys in $name for player $player',
+    ({ game, player }) => {
+      expect(Object.keys(view(game, player)).toSorted()).toEqual(gameViewKeys);
+    },
+  );
 
   it.each(players)(
     'shows player %i their own deck and both boards',
@@ -240,6 +243,15 @@ describe('view', () => {
       expect(result.deck).toEqual(midRound.round.decks[player].toSorted());
       expect(result.boards).toEqual(midRound.round.boards);
       expect(result.player).toBe(player);
+    },
+  );
+
+  it.each(statePlayers)(
+    'lists the legal moves in $name for player $player',
+    ({ game, player }) => {
+      const expected =
+        game.round.currentPlayer === player ? legalMoves(game) : [];
+      expect(view(game, player).moves).toEqual(expected);
     },
   );
 
