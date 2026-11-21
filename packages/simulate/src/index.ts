@@ -1,3 +1,11 @@
+export { playGame, runPairing, seedsFor, simulate } from './run';
+export type {
+  BoardReport,
+  GameSeeds,
+  PairingReport,
+  Report,
+  SimulateOptions,
+} from './run';
 export {
   LEVELS,
   checkOrdering,
