@@ -18,7 +18,8 @@
     "lint": "eslint . && npm run typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "sh scripts/setup-hooks.sh"
+    "prepare": "sh scripts/setup-hooks.sh",
+    "test:e2e": "npm run test:e2e -w @game/client --"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

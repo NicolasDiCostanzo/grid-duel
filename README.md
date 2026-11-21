@@ -14,7 +14,8 @@ Requires Node 24 (see `.nvmrc`) and npm.
 | `npm test`         | Run the Vitest tests of every package                   |
 | `npm run lint`     | ESLint, then the TypeScript type check of every package |
 | `npm run format`   | Format the repository with Prettier                     |
-| `npm run dev`      | Not wired yet (epic 1.10, client)                       |
+| `npm run dev`      | Start the client with the Vite dev server               |
+| `npm run test:e2e` | Play whole solo matches in Chrome with Playwright       |
 | `npm run simulate` | Play seeded bot games and write the balance report      |
 | `npm run deploy`   | Not wired yet (epic 1.13, deployment)                   |
 
@@ -24,7 +25,21 @@ Git hooks live in `.githooks/` and `npm install` enables them: `pre-commit` chec
 
 ## Packages
 
-`packages/engine`, `packages/bot`, `packages/simulate` and `packages/client`, named under the neutral scope `@game` (they are private and not published). `engine` and `bot` hold code; `simulate` and `client` are empty shells for now.
+`packages/engine`, `packages/bot`, `packages/simulate` and `packages/client`, named under the neutral scope `@game` (they are private and not published). `engine` is the rules, `bot` the three bot levels, `simulate` the balance report and `client` the web app.
+
+## Client
+
+`packages/client` is a Vite 8 and Vue 3.5 app (Composition API, `<script setup lang="ts">`). `npm run dev` starts it; `npm run build -w @game/client` builds it. A person plays a solo match against the easy, medium or hard bot on the 2x2 or 2x3 board. The engine runs in the browser and the bots run in a Web Worker, so the hard bot never freezes the interface; each bot move is delayed by 500 to 1199 ms so it feels human.
+
+Choices and why:
+
+- **Text:** every displayed name, the product name included, comes from `src/i18n/en.ts` through `vue-i18n` (MIT), which handles plurals; the pieces, blessings and Keepers have working names that are not the original's words, and a test fails if one of the original words appears.
+- **Look:** colours, fonts and spacing are CSS custom properties in `src/styles/tokens.css` with light and dark values, and a test fails if a colour is hard-coded elsewhere. Every shape is a named asset in `src/assets/manifest.ts`, so a full set can be swapped. Pieces differ by shape (circle, square, triangle, diamond), not only by colour.
+- **Component tests:** Vitest with Vue Test Utils and happy-dom, one file per component, plus a test of the match flow for every level on both board sizes.
+- **End-to-end test:** Playwright (Apache-2.0) drives the built app in the Google Chrome that is already installed, so no browser is downloaded; GitHub's Ubuntu runners include Chrome. `npm run test:e2e` plays whole matches (2x2 against easy, 2x3 against medium and against hard) at 360 px and at 1280 px width and checks that the page never scrolls sideways. It runs in CI and not in `npm test`, because it needs a browser and a build.
+- **Type check and lint:** `vue-tsc` checks the `.vue` files and `eslint-plugin-vue` lints them (its layout rules are off, Prettier formats).
+
+Not in this epic: labels that explain each effect, animations and sound (1.11), the reskin test (1.12), deployment (1.13). The 360 px layout was checked in Chrome with a viewport of that width; no real phone was available.
 
 ## Simulation and balance report
 
@@ -70,7 +85,7 @@ The hard bot cannot read the opponent's deck or offers, and the rest of the roun
 | Tool            | Choice                                         | Reason                                                                                                                                                                           |
 | --------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | TypeScript      | `~6.0.3`                                       | The latest release is 7.0.x, but `typescript-eslint` 8.72 declares support only for versions below 6.1.0. Moving to 7 is a dependency bump once `typescript-eslint` supports it. |
-| Tests           | Vitest 5, one root config                      | One run covers every package. The root config switches to Vitest projects when the client needs a browser-like environment (epic 1.10).                                          |
+| Tests           | Vitest 5, one root config with projects        | One run covers every package: Node for the engine, bots and simulation, happy-dom for the client.                                                                                |
 | Lint and format | ESLint 10 with `typescript-eslint`, Prettier 3 | ESLint covers code problems and Prettier covers layout, so no config is needed to keep them apart.                                                                               |
 | Type check      | `tsc` in each package, strict mode             | Shared options live in `tsconfig.base.json`.                                                                                                                                     |
 | Random tests    | Own seeded loop, no library                    | A failure reproduces from its seed and no dependency is needed. Upgrade path: `fast-check` (MIT), which shrinks a failing sequence.                                              |

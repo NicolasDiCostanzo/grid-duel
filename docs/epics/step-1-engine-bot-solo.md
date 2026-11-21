@@ -331,6 +331,17 @@ A person can play a full solo match against a chosen bot level on a chosen board
 - Mobile first, works at 360 px width and on desktop.
 - An end-to-end test plays one complete solo match (end-to-end tool chosen in the plan, recorded in README.md).
 
+### Rule decisions and measures
+- Stack: Vite 8, Vue 3.5 with `<script setup lang="ts">`, `vue-i18n` 11, Vitest projects (Node and happy-dom), Vue Test Utils, `vue-tsc`, `eslint-plugin-vue`, Playwright. All MIT or Apache-2.0, development tooling except Vue and `vue-i18n`. Recorded in the README ("Client").
+- End-to-end tool: Playwright with the installed Google Chrome (`channel: 'chrome'`), run in CI and by `npm run test:e2e`, not by `npm test`. It plays 2x2 against easy, 2x3 against medium and 2x3 against hard at 360 px and 1280 px and checks that there is no horizontal scroll.
+- The human is always player 0. A bot move is delayed by 500 to 1199 ms drawn from the bot's own generator. The bots run in a Web Worker (`src/solo/bot.worker.ts`).
+- Working names (`src/i18n/en.ts`): the types are Rock, Paper and Scissors, the blessings are named after what they do (Tiebreaker, Sinker, Riser, Bounty, Muffler, Intruder, Switcher, Drainer, Chameleon), the fourth type is the Keeper (Narrowing, Roaming, Warding, Silencing, Decoy, Amplifying) and the product is Tile Clash. They are placeholders: a test checks that none of the original game's words appears.
+- Layout: the opponent's board is above the player's, with the same column order so facing squares line up; the pieces on offer are below. A chosen piece highlights its legal squares; a Scout targets the opponent's board.
+- Verified here: component tests for every component and for the match flow with each level on both board sizes, and the Playwright test in Chrome (6 runs). Not verified: a real phone, and other browsers than Chrome.
+
+### Delivered interface (used by 1.11 and later)
+`App.vue` takes `options: SoloMatchOptions` (`runner`, and optional `newSeed`, `wait`, `delay` for tests). `useSoloMatch` (`src/solo/useSoloMatch.ts`) exposes `phase` (`idle`, `playing`, `round-end`, `over`), `view`, `thinking`, `summary`, `result`, `error` and the actions `start`, `play`, `nextRound`, `restart`. The `BotRunner` interface has an inline implementation (tests) and a worker implementation (browser). Components: `PieceToken`, `BoardCell`, `BoardGrid`, `OfferTray`, `ScoreBar`, `StartScreen`, `MatchScreen`, `RoundEndPanel`, `ResultScreen`.
+
 ### Done when
 A full match is playable against each bot level on both board sizes, component tests and the end-to-end test pass. `npm test` passes.
 
