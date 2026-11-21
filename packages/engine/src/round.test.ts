@@ -481,6 +481,12 @@ describe('playerView', () => {
     },
   );
 
+  it.each([0, 1] as const)('shows who plays first (%i)', (firstPlayer) => {
+    const state = { ...newRound('2x2'), firstPlayer };
+    expect(playerView(state, 0).firstPlayer).toBe(firstPlayer);
+    expect(playerView(state, 1).firstPlayer).toBe(firstPlayer);
+  });
+
   it('shows the offer to the player on turn only', () => {
     const state = newRound('2x2');
     expect(playerView(state, 0).offer).toEqual(state.offer);

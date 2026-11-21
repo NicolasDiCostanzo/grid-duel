@@ -20,6 +20,7 @@ import type {
   RecordedMove,
   Rng,
   RoundResult,
+  SampledRound,
 } from './index';
 
 type PublicTypes = [
@@ -39,6 +40,7 @@ type PublicTypes = [
   RecordedMove,
   Rng,
   RoundResult,
+  SampledRound,
 ];
 
 describe('the package entry point', () => {
