@@ -30,6 +30,7 @@ import {
 
 export type SimulateOptions = {
   games: number;
+  analysisGames: number;
   levels: readonly BotLevel[];
   boardSizes: readonly BoardSize[];
   seed: number;
@@ -161,6 +162,7 @@ export function simulate(
   onProgress: (message: string) => void = () => undefined,
 ): Report {
   const seeds = seedsFor(options.seed, options.games);
+  const analysisSeeds = seedsFor(options.seed, options.analysisGames);
   const bot = (level: BotLevel) => botFor(level, options.hardRollouts);
   const boards = options.boardSizes.map((boardSize): BoardReport => {
     const levels = LEVELS.filter((level) => options.levels.includes(level));
@@ -183,7 +185,10 @@ export function simulate(
     );
     onProgress(`${boardSize}: ${options.analysisLevel} against itself`);
     const analysis = bot(options.analysisLevel);
-    const { rounds } = runPairing(analysis, analysis, { boardSize, seeds });
+    const { rounds } = runPairing(analysis, analysis, {
+      boardSize,
+      seeds: analysisSeeds,
+    });
     const firstPlayer = firstPlayerAdvantage(rounds);
     return {
       boardSize,

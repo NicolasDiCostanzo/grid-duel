@@ -98,6 +98,7 @@ describe('runPairing', () => {
 describe('simulate', () => {
   const options = {
     games: smallGames,
+    analysisGames: smallGames * 2,
     levels: ['easy', 'medium'] as const,
     boardSizes: ['2x2'] as const,
     seed: SEED,
@@ -117,7 +118,9 @@ describe('simulate', () => {
       games: smallGames,
     });
     expect(board?.ordering.holds).toBe(report.orderingHolds);
-    expect(board?.firstPlayer.rounds).toBeGreaterThanOrEqual(2 * smallGames);
+    expect(board?.firstPlayer.rounds).toBeGreaterThanOrEqual(
+      2 * options.analysisGames,
+    );
     expect(board?.effects).toHaveLength(effectCount);
     expect(board?.randomness.drawRate).toBeGreaterThanOrEqual(0);
     expect(board?.randomness.drawRate).toBeLessThanOrEqual(1);
