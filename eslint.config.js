@@ -12,7 +12,9 @@ export default defineConfig(
     files: ['**/*.vue'],
     languageOptions: { parserOptions: { parser: tseslint.parser } },
     rules: {
+      'no-undef': 'off',
       'vue/html-indent': 'off',
+      'vue/html-self-closing': 'off',
       'vue/html-closing-bracket-newline': 'off',
       'vue/max-attributes-per-line': 'off',
       'vue/first-attribute-linebreak': 'off',

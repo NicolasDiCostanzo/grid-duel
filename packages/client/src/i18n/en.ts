@@ -19,7 +19,7 @@ export const en = {
     tally: 'Rounds won: you {you}, opponent {opponent}',
     firstPlayer: 'You play first this round.',
     secondPlayer: 'The opponent plays first this round.',
-    nothingToPlay: 'No piece to play.',
+    botError: 'The opponent could not play. Start a new match.',
   },
   cell: {
     empty: 'Empty square, column {column}, row {row}',
