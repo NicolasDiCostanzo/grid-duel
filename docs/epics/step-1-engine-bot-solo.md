@@ -80,7 +80,11 @@ The placement phase of one round as a pure state machine: a state plus a legal m
 - Per-player view: the opponent's deck and offers are hidden.
 
 ### Rule decisions (RULES.md)
-Layout, the facing row for Rotten, the duel start and the Scout taking the enemy cell are decided. Still open for the Scout step (ask the user before writing its tests): what the placer's own facing cell and the duel at that slot become, how turns continue when one board is already full, and whether the Scout counts as the turn's placement (proposed: yes).
+All decided with the user and recorded in RULES.md as interpretations:
+- Layout: each player has their own board, and a duel pairs the cells with the same column and row on the two boards. The duels begin only when every cell of both boards holds a piece.
+- Rotten nullifies the blessings on the opponent's row with the same row index as its own row, and only at the moment it is placed.
+- Scout: it is played on an enemy piece's cell, so on the opponent's board. That piece is removed from the game and the Scout takes its cell. The Scout counts for the board side it sits on and duels as its own type, so at that slot it faces whatever piece the placer has on their own board; that cell is not touched and is filled by a later placement like any other. When the opponent's board holds no piece, the Scout is placed like any piece on an empty cell of the placer's own board.
+- Playing a Scout counts as the turn's placement. A player whose board is full is skipped and the other player plays again, which only happens after a Scout replaced a piece instead of filling a cell.
 
 ### Done when
 Table-driven tests with fixtures cover each behaviour, both board sizes and each kind of illegal move. `npm test` passes.
@@ -187,7 +191,7 @@ Everything goes through `packages/engine/src/index.ts`; the engine's other modul
 - The last placement of a round resolves the effects and the duels, then starts the next round or ends the match, in the same `applyMove`. Movement events (`moved`, `transformed`, and `points`) follow cell and player iteration order. Each `duel` is followed by its `points` events, if any. A guardian duel emits `guardian` and ends duel resolution. `round-ended` follows, then `match-ended` if the match ends. Placements emit no separate event.
 - `recordOf(game)` gives `{ seed, boardSize, moves }`; `replay(record)` rebuilds the same state and events. A record is plain JSON.
 - Errors: `PlacementError` and `GameError` carry a `code`. After the match, `applyMove` throws `game-over`.
-- The catalog (piece types and effects) is not exported yet; the bots will need it and it is added in 1.7.
+- The piece data (`getPiece`, `compareTypes`, types `Piece` and `Outcome`) and the seeded generator (`createRng`, type `Rng`) are exported since 1.7; `GameView.moves` lists the legal placements of the player on turn (empty otherwise).
 - Random tests use a loop over seeds with the engine's own generator, no library (README).
 
 ### Done when
@@ -210,12 +214,19 @@ Two bot levels in the `bot` package. A bot is a pure function from the player's 
 ### Behaviours (target for tests)
 - Easy: plays a legal move chosen at random.
 - Medium: counters what it can see (prefers a piece whose type beats the visible facing opponent piece) and otherwise plays randomly. It ignores blessing effects when choosing.
-- Both bots only receive the per-player view: a test checks that no hidden data (opponent deck, offers, future draws) is reachable from the input.
+- Both bots only receive the per-player view (type `GameView`), so no hidden data (opponent deck, offers, future draws) is reachable from the input. What the view contains is tested in the engine (1.6), not again in the bot package.
 - Both always return a legal move and are deterministic for the same view and seed.
 - Over many seeded games, medium beats easy with a win rate above a threshold chosen in the plan (for example 60 percent over 1000 games).
 
+### Rule decisions and measures
+- Medium's facing rule: it wants its own board's piece to beat the opponent board's piece at the cell, by type only. A normal move lands on its own board, so the moved piece must beat the visible opposing piece. A Scout lands on the opponent's board and counts for the opponent (RULES.md), so the bot's existing piece must beat the Scout.
+- Win-rate threshold: medium beats easy in at least 58% of 1000 seeded games per board size, seats alternated. Measured: 66.9% (2x2) and 70.0% (2x3); easy against easy and medium against medium sit near 50%.
+
+### Delivered interface (used by 1.8 and later)
+`easyBot` and `mediumBot` from `packages/bot/src/index.ts`, typed `Bot = (view: GameView, rng: BotRng) => Move` with `BotRng = { nextInt(max): number }`. A bot picks one of `view.moves` and throws if there is none (not the player's turn). The test helpers `playMatch` and `winRate` in `packages/bot/test/helpers/match.ts` play two bots through the engine API; 1.9 can promote them into the simulation tool.
+
 ### Done when
-Tests cover legality, determinism, the view restriction and the medium-over-easy win rate. `npm test` passes.
+Tests cover legality, determinism and the medium-over-easy win rate. `npm test` passes.
 
 ### Out of scope
 Hard bot (1.8), human-like thinking delays (client, 1.10).

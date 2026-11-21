@@ -24,7 +24,18 @@ Git hooks live in `.githooks/` and `npm install` enables them: `pre-commit` chec
 
 ## Packages
 
-`packages/engine`, `packages/bot`, `packages/simulate` and `packages/client`, named under the neutral scope `@game` (they are private and not published). They are empty shells for now.
+`packages/engine`, `packages/bot`, `packages/simulate` and `packages/client`, named under the neutral scope `@game` (they are private and not published). `engine` and `bot` hold code; `simulate` and `client` are empty shells for now.
+
+## Bots
+
+A bot is a pure function `(view, rng) => move` in `packages/bot`. It receives only the `GameView` of its player (own deck and offer, both boards, the legal `moves`) and an injected random generator, so it cannot read hidden data and gives the same move for the same view and seed.
+
+| Level  | How it chooses                                                                                                                                                                                                                        |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Easy   | A random legal move.                                                                                                                                                                                                                  |
+| Medium | Among the legal moves, those where its own board piece beats the opposing board piece at that cell, by type only (blessings are ignored); a random one of them, or a random legal move if none wins. A Scout counts for the opponent. |
+
+Measured on 1000 seeded games per board size with alternating seats (epic 1.7): medium beats easy 66.9% of the time on 2x2 and 70.0% on 2x3. The test requires at least 58%.
 
 ## Tooling choices
 

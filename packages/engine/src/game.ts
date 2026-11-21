@@ -133,6 +133,7 @@ export function replay(record: GameRecord): {
 }
 
 export type GameView = PlayerView & {
+  moves: readonly Move[];
   results: readonly RoundResult[];
   wins: readonly [number, number];
   winner: PlayerId | null;
@@ -140,6 +141,7 @@ export type GameView = PlayerView & {
 
 export const view = (game: GameState, player: PlayerId): GameView => ({
   ...playerView(game.round, player),
+  moves: game.round.currentPlayer === player ? legalMoves(game) : [],
   results: game.results,
   wins: matchStatus(game.results).wins,
   winner: game.winner,
