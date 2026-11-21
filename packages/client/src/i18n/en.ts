@@ -23,7 +23,7 @@ export const en = {
   },
   cell: {
     empty: 'Empty square, column {column}, row {row}',
-    occupied: '{piece}, column {column}, row {row}',
+    occupied: '{piece}, {owner}, column {column}, row {row}',
     mine: 'yours',
     theirs: "opponent's",
   },
@@ -43,6 +43,7 @@ export const en = {
     again: 'Play again',
     settings: 'New settings',
   },
+  piece: { nullified: 'blessing cancelled' },
   points: 'no points | {n} point | {n} points',
   pieces: {
     types: { r0: 'Rock', r1: 'Paper', r2: 'Scissors' },
