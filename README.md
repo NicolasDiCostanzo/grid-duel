@@ -34,8 +34,17 @@ A bot is a pure function `(view, rng) => move` in `packages/bot`. It receives on
 | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Easy   | A random legal move.                                                                                                                                                                                                                  |
 | Medium | Among the legal moves, those where its own board piece beats the opposing board piece at that cell, by type only (blessings are ignored); a random one of them, or a random legal move if none wins. A Scout counts for the opponent. |
+| Hard   | Sampled search: for every legal move it plays the rest of the round many times with the engine and plays the move that wins the round most often (a draw counts for half).                                                            |
 
 Measured on 1000 seeded games per board size with alternating seats (epic 1.7): medium beats easy 68.4% of the time on 2x2 and 71.2% on 2x3. The test requires at least 58%.
+
+### Hard bot
+
+The hard bot cannot read the opponent's deck or offers, and the rest of the round is random (the Trickster, the offers) and full of effects whose order matters. Instead of re-implementing the rules, it asks the engine: `sampleRound(view, move, source)` plays the move, deals the cards it cannot see at random (the 36 pieces minus those visible on the opponent's board), finishes the round with random legal moves and resolves the effects and duels with the real engine. For each legal move the bot runs the same set of random deals (so moves are compared on equal terms), scores a round win as 1 and a draw as 0.5, and plays one of the best moves.
+
+- The budget is a number of rollouts (800 by default, shared between the legal moves), not a duration, so the same view and seed always give the same move. The worst move measured here takes about 100 ms (2x2) and 120 ms (2x3). A mid-range phone cannot be measured from this machine; the budget is a constructor option (`createHardBot({ rollouts })`) if the client needs to lower it.
+- Known limits: the unseen pool ignores pieces removed by a Scout, the bot plays each round to win it without looking at the match score, and the rollouts assume random play by both sides, so it may underrate a strong opponent.
+- Measured on seeded games with alternating seats: with a budget of 200 rollouts the hard bot beats medium in 86.7% of 60 games on 2x2 and 91.7% on 2x3; with the default budget 93.3% and 90.0% (60 games) and 100% against easy (40 games). The test requires at least 75% against medium with the reduced budget, which keeps it fast.
 
 ## Tooling choices
 

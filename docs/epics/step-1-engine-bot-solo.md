@@ -244,13 +244,22 @@ A hard bot that plays as well as the visible information allows, taking effects 
 
 ### Behaviours (target for tests)
 - It uses the engine to simulate the duel phase of candidate boards (effects, order, points) and handles hidden information (opponent deck and offers, Trickster randomness) by sampling or expectation. The algorithm is chosen in the plan (for example sampled search); record the reasoning in README.md.
-- It only receives the per-player view, same restriction as the other bots.
+- It only receives the per-player view (type `GameView`), same restriction as the other bots.
 - Over many seeded games hard beats medium and medium beats easy, on both board sizes, with thresholds chosen in the plan.
 - A move takes under 500 ms. A timing test runs on the dev machine with a safety margin. A mid-range phone cannot be measured here, so state that in the report.
 - Deterministic for a given view and seed.
 
+### Rule decisions and measures
+- Algorithm: sampled search (README, "Hard bot"). The engine exports `sampleRound(view, move, source)`, which deals the unseen cards at random, plays the rest of the round randomly and resolves it with the real engine. `GameView` gains `firstPlayer` (public, needed for the resolution order).
+- The budget is a rollout count, not a duration, so the bot stays deterministic. Default 800 rollouts, worst move about 100 ms (2x2) and 120 ms (2x3) here; a phone cannot be measured from this machine.
+- Threshold: hard beats medium in at least 75% of 60 seeded games per board size with a budget of 200 rollouts (measured 86.7% on 2x2, 91.7% on 2x3). With the default budget: 93.3% and 90.0% over 60 games; 100% against easy over 40 games.
+- As for 1.7, the view restriction is carried by the bot's type (`GameView` only) and tested in the engine (1.6), not again in the bot package.
+
+### Delivered interface (used by 1.9 and later)
+`hardBot` (800 rollouts) and `createHardBot({ rollouts })` from `packages/bot/src/index.ts`, same `Bot` type as the other levels. `sampleRound` and `SampledRound` are exported by the engine.
+
 ### Done when
-Tests cover legality, the view restriction, the win-rate ordering hard > medium > easy and the time budget. `npm test` passes.
+Tests cover legality, the win-rate ordering hard > medium > easy and the time budget. `npm test` passes.
 
 ### Out of scope
 Simulation report tooling (1.9), client integration (1.10).

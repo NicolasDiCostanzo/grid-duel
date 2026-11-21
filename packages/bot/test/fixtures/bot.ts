@@ -28,3 +28,7 @@ export const mediumOverEasyMinimum = 0.58;
 export const hardContractSeeds: readonly number[] = [1, 2, 3, 4, 5];
 export const hardTestRollouts = 40;
 export const moveBudgetMs = 500;
+
+export const hardWinRateGames = 60;
+export const hardWinRateRollouts = 200;
+export const hardOverMediumMinimum = 0.75;
