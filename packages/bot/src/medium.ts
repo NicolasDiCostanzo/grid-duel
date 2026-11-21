@@ -13,10 +13,12 @@ const beatsFacingPiece = (view: GameView, move: Move): boolean => {
   const opponent = view.player === 0 ? 1 : 0;
   const ownPiece = view.boards[view.player][index]?.pieceId;
   const opponentPiece = view.boards[opponent][index]?.pieceId;
-  const replaces = ownPiece !== undefined;
+  const replaces =
+    getPiece(move.pieceId).effect === 'replace' &&
+    view.boards[opponent].some((placed) => placed !== null);
   const mine = replaces ? ownPiece : move.pieceId;
   const theirs = replaces ? move.pieceId : opponentPiece;
-  return theirs !== undefined && typeWins(mine, theirs);
+  return mine !== undefined && theirs !== undefined && typeWins(mine, theirs);
 };
 
 export const mediumBot: Bot = (view, rng) => {

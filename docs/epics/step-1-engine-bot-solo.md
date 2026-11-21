@@ -220,7 +220,7 @@ Two bot levels in the `bot` package. A bot is a pure function from the player's 
 
 ### Rule decisions and measures
 - Medium's facing rule: it wants its own board's piece to beat the opponent board's piece at the cell, by type only. A normal move lands on its own board, so the moved piece must beat the visible opposing piece. A Scout lands on the opponent's board and counts for the opponent (RULES.md), so the bot's existing piece must beat the Scout.
-- Win-rate threshold: medium beats easy in at least 58% of 1000 seeded games per board size, seats alternated. Measured: 68.4% (2x2) and 71.2% (2x3); easy against easy and medium against medium sit near 50%.
+- Win-rate threshold: medium beats easy in at least 58% of 1000 seeded games per board size, seats alternated. Measured: 66.9% (2x2) and 70.0% (2x3); easy against easy and medium against medium sit near 50%.
 
 ### Delivered interface (used by 1.8 and later)
 `easyBot` and `mediumBot` from `packages/bot/src/index.ts`, typed `Bot = (view: GameView, rng: BotRng) => Move` with `BotRng = { nextInt(max): number }`. A bot picks one of `view.moves` and throws if there is none (not the player's turn). The test helpers `playMatch` and `winRate` in `packages/bot/test/helpers/match.ts` play two bots through the engine API; 1.9 can promote them into the simulation tool.
