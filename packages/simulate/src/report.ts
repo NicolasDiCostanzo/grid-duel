@@ -114,6 +114,8 @@ const renderBoard = (board: BoardReport, analysisLevel: string): string[] => [
   '',
   'Score of a player in a round: win 100%, draw 50%, loss 0%. "Rounds played" counts each player in each round once. The difference compares the rounds where a player placed a piece with the blessing with the other rounds.',
   '',
+  'Read the Shepherd blessings (Lone, Wandering, Guardian, Rotten+, False, Golden) with care: a Shepherd loses to every regular piece by type, so a negative difference mostly reflects that base weakness and is not specific to the blessing. Compare the Shepherds with each other.',
+  '',
   row(
     'Blessing',
     'Rounds played',
