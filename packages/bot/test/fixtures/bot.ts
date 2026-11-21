@@ -21,3 +21,6 @@ export const spreadSeeds: readonly number[] = Array.from(
   { length: 300 },
   (_, index) => index + 1,
 );
+
+export const winRateGames = 1000;
+export const mediumOverEasyMinimum = 0.58;

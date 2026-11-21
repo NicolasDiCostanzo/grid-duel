@@ -10,7 +10,7 @@ import {
   type PlayerId,
 } from '@game/engine';
 import type { Bot } from '../../src/index';
-import { maxMoves } from '../fixtures/bot';
+import { botSeedsFor, hexSeedFor, maxMoves } from '../fixtures/bot';
 
 export type Turn = { view: GameView; move: Move };
 
@@ -36,4 +36,26 @@ export const playMatch = (
     game = applyMove(game, player, move).state;
   }
   return { game, turns };
+};
+
+export const winRate = (
+  candidate: Bot,
+  opponent: Bot,
+  options: { boardSize: BoardSize; games: number },
+): number => {
+  let wins = 0;
+  for (let index = 1; index <= options.games; index++) {
+    const seat = (index % 2) as PlayerId;
+    const bots: readonly [Bot, Bot] =
+      seat === 0 ? [candidate, opponent] : [opponent, candidate];
+    const { game } = playMatch(bots, {
+      seed: hexSeedFor(index),
+      boardSize: options.boardSize,
+      botSeeds: botSeedsFor(index),
+    });
+    if (game.winner === seat) {
+      wins++;
+    }
+  }
+  return wins / options.games;
 };
