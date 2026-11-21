@@ -147,4 +147,11 @@ export const mediumCases: readonly MediumCase[] = [
     offer: [SCOUT_PAPER, SCISSORS],
     pool: 'all',
   },
+  {
+    name: 'does not treat a Scout on an empty own square as facing the piece it replaces',
+    own: [N, N, N, N],
+    opp: [SCISSORS, N, N, N],
+    offer: [SCOUT_ROCK, SCISSORS],
+    pool: 'all',
+  },
 ];

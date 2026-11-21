@@ -55,7 +55,7 @@ A bot is a pure function `(view, rng) => move` in `packages/bot`. It receives on
 | Medium | Among the legal moves, those where its own board piece beats the opposing board piece at that cell, by type only (blessings are ignored); a random one of them, or a random legal move if none wins. A Scout counts for the opponent. |
 | Hard   | Sampled search: for every legal move it plays the rest of the round many times with the engine and plays the move that wins the round most often (a draw counts for half).                                                            |
 
-Measured on 1000 seeded games per board size with alternating seats (epic 1.7): medium beats easy 68.4% of the time on 2x2 and 71.2% on 2x3. The test requires at least 58%.
+Measured on 1000 seeded games per board size with alternating seats (epic 1.7): medium beats easy 66.9% of the time on 2x2 and 70.0% on 2x3. The test requires at least 58%.
 
 ### Hard bot
 
