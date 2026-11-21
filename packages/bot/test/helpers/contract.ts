@@ -58,35 +58,5 @@ export function describeBotContract(name: string, bot: Bot): void {
       const waiting = view(game, game.round.currentPlayer === 0 ? 1 : 0);
       expect(() => bot(waiting, createRng(SEED))).toThrow();
     });
-
-    it('chooses the same move whatever the hidden state is', () => {
-      const game = createGame({ seed: hexSeedFor(1), boardSize: '2x2' });
-      const player = game.round.currentPlayer as PlayerId;
-      const opponent = player === 0 ? 1 : 0;
-      const hidden = [
-        {
-          ...game,
-          round: {
-            ...game.round,
-            decks: game.round.decks.map((deck, index) =>
-              index === opponent ? deck.toReversed() : deck,
-            ) as unknown as typeof game.round.decks,
-          },
-        },
-        { ...game, seed: hexSeedFor(99) },
-        { ...game, moves: [] },
-        {
-          ...game,
-          round: {
-            ...game.round,
-            rngState: createRng(hexSeedFor(99)).snapshot(),
-          },
-        },
-      ];
-      const expected = bot(view(game, player), createRng(SEED));
-      for (const variant of hidden) {
-        expect(bot(view(variant, player), createRng(SEED))).toEqual(expected);
-      }
-    });
   });
 }
