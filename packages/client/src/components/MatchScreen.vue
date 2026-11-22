@@ -18,7 +18,6 @@ const emit = defineEmits<{ play: [move: Move] }>();
 const { t } = useI18n();
 
 const chosen = shallowRef<string | null>(null);
-const hoveredDuel = shallowRef<number | null>(null);
 
 const offer = computed(() => view.offer ?? []);
 const selected = computed(() =>
@@ -75,9 +74,7 @@ function choose(cell: Cell): void {
         owner="mine"
         :legal-cells="targets.own"
         :title="t('match.yourBoard')"
-        :highlighted-duel="hoveredDuel"
         @choose="choose"
-        @hover="hoveredDuel = $event"
       />
       <BoardGrid
         :board-size="view.boardSize"
@@ -86,9 +83,7 @@ function choose(cell: Cell): void {
         :legal-cells="targets.opponent"
         :title="t('match.opponentBoard')"
         mirrored
-        :highlighted-duel="hoveredDuel"
         @choose="choose"
-        @hover="hoveredDuel = $event"
       />
     </div>
     <p class="match__hint">{{ t('match.duelHint') }}</p>

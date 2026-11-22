@@ -5,23 +5,15 @@ import { pieceLabel } from '../i18n/pieces';
 import type { Cell, Owner, Placed } from '../types';
 import PieceToken from './PieceToken.vue';
 
-const {
-  cell,
-  duel,
-  piece,
-  owner,
-  legal,
-  highlighted = false,
-} = defineProps<{
+const { cell, duel, piece, owner, legal } = defineProps<{
   cell: Cell;
   duel: number;
   piece: Placed | null;
   owner: Owner;
   legal: boolean;
-  highlighted?: boolean;
 }>();
 
-const emit = defineEmits<{ choose: []; hover: [active: boolean] }>();
+const emit = defineEmits<{ choose: [] }>();
 
 const { t } = useI18n();
 
@@ -41,15 +33,11 @@ const label = computed(() => {
   <component
     :is="legal ? 'button' : 'div'"
     class="cell"
-    :class="{ 'cell--legal': legal, 'cell--highlighted': highlighted }"
+    :class="{ 'cell--legal': legal }"
     :type="legal ? 'button' : undefined"
     :role="legal ? undefined : 'img'"
     :aria-label="label"
     @click="legal && emit('choose')"
-    @pointerenter="emit('hover', true)"
-    @pointerleave="emit('hover', false)"
-    @focus="emit('hover', true)"
-    @blur="emit('hover', false)"
   >
     <span class="cell__duel" aria-hidden="true">{{ duel }}</span>
     <PieceToken
@@ -95,17 +83,6 @@ const label = computed(() => {
   font-size: var(--font-size-small);
   font-weight: 700;
   line-height: 1;
-}
-
-.cell--highlighted {
-  border-color: var(--color-focus);
-  background: var(--color-cell-selected);
-}
-
-.cell--highlighted .cell__duel {
-  border-color: var(--color-focus);
-  background: var(--color-focus);
-  color: var(--color-bg);
 }
 
 .cell--legal {

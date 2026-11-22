@@ -86,35 +86,4 @@ describe('BoardGrid', () => {
       ).toEqual(numbers);
     },
   );
-
-  it('reports the duel of the square under the pointer, then none', async () => {
-    const wrapper = mountWithI18n(BoardGrid, {
-      props: {
-        boardSize: '2x2',
-        cells: Array(4).fill(null),
-        owner: 'mine',
-        legalCells: [],
-        title: 'Board',
-      },
-    });
-    await wrapper.findAll('.cell')[1]?.trigger('pointerenter');
-    await wrapper.findAll('.cell')[1]?.trigger('pointerleave');
-    expect(wrapper.emitted('hover')).toEqual([[1], [null]]);
-  });
-
-  it('highlights the squares of the chosen duel', () => {
-    const wrapper = mountWithI18n(BoardGrid, {
-      props: {
-        boardSize: '2x2',
-        cells: Array(4).fill(null),
-        owner: 'mine',
-        legalCells: [],
-        title: 'Board',
-        highlightedDuel: 4,
-      },
-    });
-    const lit = wrapper.findAll('.cell--highlighted');
-    expect(lit).toHaveLength(1);
-    expect(lit[0]?.get('.cell__duel').text()).toBe('4');
-  });
 });

@@ -114,17 +114,16 @@ describe('MatchScreen', () => {
     );
   });
 
-  it('highlights the square that faces the one under the pointer', async () => {
-    const wrapper = mountMatch();
-    const own = wrapper.findAll('section.board')[0];
-    await own?.findAll('.cell')[1]?.trigger('pointerenter');
-    const lit = wrapper.findAll('.cell--highlighted');
-    expect(lit).toHaveLength(2);
-    expect(lit.map((cell) => cell.get('.cell__duel').text())).toEqual([
-      '1',
-      '1',
-    ]);
-    await own?.findAll('.cell')[1]?.trigger('pointerleave');
+  it('never highlights the opponent board when you point at your squares', async () => {
+    const wrapper = mountMatch({ offer: ['r0', 'r1', 'r2'] });
+    const [own, opponent] = wrapper.findAll('section.board');
+    for (const cell of own?.findAll('.cell') ?? []) {
+      await cell.trigger('pointerenter');
+      await cell.trigger('focus');
+    }
     expect(wrapper.findAll('.cell--highlighted')).toHaveLength(0);
+    for (const cell of opponent?.findAll('.cell') ?? []) {
+      expect(cell.classes()).toEqual(['cell']);
+    }
   });
 });

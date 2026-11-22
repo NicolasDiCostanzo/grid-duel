@@ -61,31 +61,4 @@ describe('BoardCell', () => {
     });
     expect(wrapper.get('.cell__duel').text()).toBe('3');
   });
-
-  it('can be highlighted as one half of a duel', () => {
-    const wrapper = mountWithI18n(BoardCell, {
-      props: {
-        cell,
-        duel: 1,
-        piece: null,
-        owner: 'mine',
-        legal: false,
-        highlighted: true,
-      },
-    });
-    expect(wrapper.classes()).toContain('cell--highlighted');
-  });
-
-  it.each([
-    ['pointerenter', true],
-    ['pointerleave', false],
-    ['focus', true],
-    ['blur', false],
-  ])('reports %s so the facing square can be shown', async (event, active) => {
-    const wrapper = mountWithI18n(BoardCell, {
-      props: { cell, duel: 1, piece: null, owner: 'mine', legal: true },
-    });
-    await wrapper.trigger(event);
-    expect(wrapper.emitted('hover')).toEqual([[active]]);
-  });
 });

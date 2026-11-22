@@ -11,7 +11,6 @@ const {
   legalCells,
   title,
   mirrored = false,
-  highlightedDuel = null,
 } = defineProps<{
   boardSize: BoardSize;
   cells: readonly (Placed | null)[];
@@ -19,13 +18,9 @@ const {
   legalCells: readonly Cell[];
   title: string;
   mirrored?: boolean;
-  highlightedDuel?: number | null;
 }>();
 
-const emit = defineEmits<{
-  choose: [cell: Cell];
-  hover: [duel: number | null];
-}>();
+const emit = defineEmits<{ choose: [cell: Cell] }>();
 
 const headingId = useId();
 const rows = computed(() => (boardSize === '2x2' ? 2 : 3));
@@ -61,9 +56,7 @@ const squares = computed(() =>
         :piece="square.piece"
         :owner="owner"
         :legal="square.legal"
-        :highlighted="square.duel === highlightedDuel"
         @choose="emit('choose', square.cell)"
-        @hover="emit('hover', $event ? square.duel : null)"
       />
     </div>
   </section>
