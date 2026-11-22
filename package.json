@@ -10,7 +10,7 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "node -e \"console.error('dev is not wired yet (epic 1.10)'); process.exit(1)\"",
+    "dev": "npm run dev -w @game/client --",
     "test": "vitest run",
     "simulate": "npm run simulate -w @game/simulate --",
     "deploy": "node -e \"console.error('deploy is not wired yet (epic 1.13)'); process.exit(1)\"",
@@ -18,12 +18,14 @@
     "lint": "eslint . && npm run typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "sh scripts/setup-hooks.sh"
+    "prepare": "sh scripts/setup-hooks.sh",
+    "test:e2e": "npm run test:e2e -w @game/client --"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.6.6",
     "eslint": "^10.15.0",
+    "eslint-plugin-vue": "^10.12.1",
     "prettier": "^3.10.1",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.73.0",

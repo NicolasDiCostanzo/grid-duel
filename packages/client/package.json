@@ -6,6 +6,24 @@
   "license": "AGPL-3.0-only",
   "main": "src/index.ts",
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json"
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@game/bot": "*",
+    "@game/engine": "*",
+    "vue": "^3.5.46",
+    "vue-i18n": "^11.4.23"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "@vitejs/plugin-vue": "^6.0.11",
+    "@vue/test-utils": "^2.6.0",
+    "happy-dom": "^21.0.4",
+    "vite": "^8.3.8",
+    "vue-tsc": "^3.3.14"
   }
 }
