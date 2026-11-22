@@ -28,16 +28,38 @@ describe('parseArgs', () => {
     });
   });
 
-  it.each(usageErrors)('rejects %s', (_name, args) => {
+  it.each(usageErrors)('rejects %s', (_name, args, flag) => {
     const result = parseArgs(args);
     expect(result.ok).toBe(false);
+    const problem = result.ok ? '' : (result.message.split('\n')[0] ?? '');
+    expect(problem).toContain(flag);
+  });
+
+  it('shows the usage for --help without calling it a mistake', () => {
+    const result = parseArgs(['--help']);
+    expect(result).toMatchObject({ ok: false, help: true });
+    expect(result.ok ? '' : result.message).toContain('Usage');
+  });
+
+  it('accepts a seed of any size that is still exact', () => {
+    expect(parseArgs(['--seed', '9007199254740991'])).toMatchObject({
+      ok: true,
+      options: { seed: 9007199254740991 },
+    });
+  });
+
+  it('accepts any text as the output folder', () => {
+    expect(parseArgs(['--out', 'some/-odd folder'])).toMatchObject({
+      ok: true,
+      options: { out: 'some/-odd folder' },
+    });
   });
 });
 
 describe('runCli', () => {
-  it('writes the Markdown and the JSON report and prints where', async () => {
+  it('writes the Markdown and the JSON report and prints where', () => {
     const { io, files, messages } = fakeIo();
-    await runCli(smallRun, io);
+    runCli(smallRun, io);
     expect([...files.keys()].toSorted()).toEqual([
       'out/balance-report.json',
       'out/balance-report.md',
@@ -52,29 +74,36 @@ describe('runCli', () => {
     expect(messages.join('\n')).toContain('out/balance-report.md');
   });
 
-  it('is reproducible from the seed', async () => {
+  it('is reproducible from the seed', () => {
     const first = fakeIo();
     const second = fakeIo();
-    await runCli(smallRun, first.io);
-    await runCli(smallRun, second.io);
+    runCli(smallRun, first.io);
+    runCli(smallRun, second.io);
     expect(second.files).toEqual(first.files);
   });
 
-  it('exits with 0 when the ordering holds', async () => {
+  it('exits with 0 when the ordering holds', () => {
     const { io } = fakeIo();
-    expect(await runCli(smallRun, io, () => report)).toBe(0);
+    expect(runCli(smallRun, io, () => report)).toBe(0);
   });
 
-  it('exits with 1 and says why when the ordering does not hold', async () => {
+  it('exits with 1 and says why when the ordering does not hold', () => {
     const { io, errors } = fakeIo();
     const failing = { ...report, orderingHolds: false };
-    expect(await runCli(smallRun, io, () => failing)).toBe(1);
+    expect(runCli(smallRun, io, () => failing)).toBe(1);
     expect(errors.join('\n')).toContain('ordering');
   });
 
-  it('exits with 2 and writes nothing on a usage error', async () => {
+  it('prints the usage and exits with 0 for --help, writing nothing', () => {
+    const { io, files, messages } = fakeIo();
+    expect(runCli(['--help'], io)).toBe(0);
+    expect(files.size).toBe(0);
+    expect(messages.join('\n')).toContain('Usage');
+  });
+
+  it('exits with 2 and writes nothing on a usage error', () => {
     const { io, files, errors } = fakeIo();
-    expect(await runCli(['--games', '0'], io)).toBe(2);
+    expect(runCli(['--games', '0'], io)).toBe(2);
     expect(files.size).toBe(0);
     expect(errors.length).toBeGreaterThan(0);
   });

@@ -285,7 +285,7 @@ Depends on: 1.8 (all bots). Present a plan for this epic and wait for validation
 ### Rule decisions and measures
 - Output: `reports/balance-report.md` and `.json`, not committed (`reports/` is ignored). The first report is kept as a baseline in `docs/reports/balance-baseline.md`.
 - The ordering check passes when every stronger level wins more than half of its games against each weaker level that was played. The command exits with 1 when it does not hold and with 2 on a usage error.
-- The first player advantage, the blessing impact and the draw rate come from games of one analysis level against itself (`easy` by default, 3000 games for the baseline), because random play places each blessing independently of the situation. The luck of the offers and the draws is reported as the share of matches the weaker level still wins, and the share of drawn rounds.
+- The first player advantage, the blessing impact and the draw rate come from games of one analysis level against itself (`easy` by default, 3000 games for the baseline), because random play places each blessing approximately independently of the situation. The luck of the offers and the draws is reported as the share of matches the weaker level still wins, and the share of drawn rounds.
 - `tsx` (MIT, development only) runs the command line, because Node 24 does not resolve the extensionless imports of the workspace packages.
 
 ### First report (baseline, seed 1, 100 games per pairing, default hard bot)

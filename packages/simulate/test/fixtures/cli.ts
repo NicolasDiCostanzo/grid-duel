@@ -57,16 +57,40 @@ export const parseCases: readonly {
 export const usageErrors: readonly (readonly [
   name: string,
   args: readonly string[],
+  flag: string,
 ])[] = [
-  ['an unknown option', ['--nope']],
-  ['a missing value', ['--games']],
-  ['a games count that is not a positive integer', ['--games', '0']],
-  ['a games count that is not a number', ['--games', 'many']],
-  ['an analysis games count of zero', ['--analysis-games', '0']],
-  ['an unknown level', ['--levels', 'easy,expert']],
-  ['an unknown board', ['--board', '3x3']],
-  ['an unknown analysis level', ['--analysis-level', 'expert']],
-  ['a rollout count that is not a positive integer', ['--hard-rollouts', '0']],
+  ['an unknown option', ['--nope'], '--nope'],
+  ['a missing value', ['--games'], '--games'],
+  [
+    'an option where a value is expected',
+    ['--games', '--seed', '5'],
+    '--games',
+  ],
+  ['an option instead of the output folder', ['--out', '--seed', '5'], '--out'],
+  ['a games count that is not a positive integer', ['--games', '0'], '--games'],
+  ['a games count that is not a number', ['--games', 'many'], '--games'],
+  [
+    'an analysis games count of zero',
+    ['--analysis-games', '0'],
+    '--analysis-games',
+  ],
+  ['an unknown level', ['--levels', 'easy,expert'], '--levels'],
+  ['a single level', ['--levels', 'easy'], '--levels'],
+  ['the same level twice', ['--levels', 'hard,hard'], '--levels'],
+  ['an unknown board', ['--board', '3x3'], '--board'],
+  [
+    'an unknown analysis level',
+    ['--analysis-level', 'expert'],
+    '--analysis-level',
+  ],
+  [
+    'a rollout count that is not a positive integer',
+    ['--hard-rollouts', '0'],
+    '--hard-rollouts',
+  ],
+  ['a negative seed', ['--seed', '-5'], '--seed'],
+  ['a seed too large to be exact', ['--seed', '9007199254740993'], '--seed'],
+  ['a seed written as an exponent', ['--seed', '1e40'], '--seed'],
 ];
 
 export const smallRun = [

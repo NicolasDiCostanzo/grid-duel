@@ -67,6 +67,21 @@ export const orderingCases: readonly OrderingCase[] = [
     failed: [],
   },
   {
+    name: 'skips a pairing without any game and still checks the others',
+    pairings: [
+      { a: 'hard', b: 'medium', games: 0, aWins: 0 },
+      pairing('medium', 'easy', 45),
+    ],
+    holds: false,
+    failed: ['medium over easy'],
+  },
+  {
+    name: 'holds when no game was played at all',
+    pairings: [{ a: 'hard', b: 'medium', games: 0, aWins: 0 }],
+    holds: true,
+    failed: [],
+  },
+  {
     name: 'lists every failing pairing',
     pairings: [pairing('hard', 'medium', 40), pairing('hard', 'easy', 10)],
     holds: false,

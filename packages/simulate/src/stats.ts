@@ -59,7 +59,7 @@ export function checkOrdering(pairings: readonly Pairing[]): {
     ({ a, b, games, aWins }): OrderingFailure[] => {
       const rankA = LEVELS.indexOf(a);
       const rankB = LEVELS.indexOf(b);
-      if (rankA === rankB) {
+      if (rankA === rankB || games === 0) {
         return [];
       }
       const aIsStronger = rankA > rankB;

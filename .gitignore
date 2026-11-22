@@ -1,7 +1,7 @@
 node_modules
 dist
 coverage
-reports
+/reports/
 *.log*
 CLAUDE.md
 CLAUDE.md.bak

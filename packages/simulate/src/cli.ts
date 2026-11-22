@@ -12,7 +12,8 @@ export type CliIo = {
 };
 
 export type ParseResult =
-  { ok: true; options: CliOptions } | { ok: false; message: string };
+  | { ok: true; options: CliOptions }
+  | { ok: false; message: string; help?: boolean };
 
 const USAGE = `Usage: npm run simulate -- [--games N] [--analysis-games N] [--levels easy,medium,hard] [--board 2x2|2x3|both] [--seed N] [--analysis-level LEVEL] [--hard-rollouts N] [--out DIR]`;
 
@@ -22,12 +23,29 @@ const BOARDS: Readonly<Record<string, readonly BoardSize[]>> = {
   both: ['2x2', '2x3'],
 };
 
+const KNOWN_FLAGS: ReadonlySet<string> = new Set([
+  '--games',
+  '--analysis-games',
+  '--seed',
+  '--hard-rollouts',
+  '--levels',
+  '--board',
+  '--analysis-level',
+  '--out',
+  '--help',
+]);
+
 const isLevel = (value: string): value is BotLevel =>
   (LEVELS as readonly string[]).includes(value);
 
 const positiveInteger = (value: string): number | null => {
   const number = Number(value);
   return Number.isInteger(number) && number > 0 ? number : null;
+};
+
+const positiveSafeInteger = (value: string): number | null => {
+  const number = positiveInteger(value);
+  return number !== null && Number.isSafeInteger(number) ? number : null;
 };
 
 export function parseArgs(args: readonly string[]): ParseResult {
@@ -44,16 +62,28 @@ export function parseArgs(args: readonly string[]): ParseResult {
     ok: false,
     message: `${message}\n${USAGE}`,
   });
+  if (args.includes('--help')) {
+    return { ok: false, message: USAGE, help: true };
+  }
   for (let index = 0; index < args.length; index += 2) {
     const flag = args[index] as string;
     const value = args[index + 1];
-    if (value === undefined) {
+    if (value === undefined || KNOWN_FLAGS.has(value)) {
       return fail(`Missing value for ${flag}`);
     }
     switch (flag) {
+      case '--seed': {
+        const seed = positiveSafeInteger(value);
+        if (seed === null) {
+          return fail(
+            `--seed needs a positive integer up to ${Number.MAX_SAFE_INTEGER}, got ${value}`,
+          );
+        }
+        options.seed = seed;
+        break;
+      }
       case '--games':
       case '--analysis-games':
-      case '--seed':
       case '--hard-rollouts': {
         const number = positiveInteger(value);
         if (number === null) {
@@ -61,7 +91,6 @@ export function parseArgs(args: readonly string[]): ParseResult {
         }
         if (flag === '--games') options.games = number;
         else if (flag === '--analysis-games') options.analysisGames = number;
-        else if (flag === '--seed') options.seed = number;
         else options.hardRollouts = number;
         break;
       }
@@ -70,6 +99,11 @@ export function parseArgs(args: readonly string[]): ParseResult {
         if (!levels.every(isLevel)) {
           return fail(
             `--levels needs levels among ${LEVELS.join(', ')}, got ${value}`,
+          );
+        }
+        if (new Set(levels).size < 2) {
+          return fail(
+            `--levels needs at least two different levels, got ${value}`,
           );
         }
         options.levels = levels;
@@ -111,6 +145,10 @@ export function runCli(
 ): number {
   const parsed = parseArgs(args);
   if (!parsed.ok) {
+    if (parsed.help) {
+      io.log(parsed.message);
+      return 0;
+    }
     io.error(parsed.message);
     return 2;
   }
