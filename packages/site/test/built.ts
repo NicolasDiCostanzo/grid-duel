@@ -33,6 +33,8 @@ export const textOf = (html: string): string =>
     .trim();
 
 export const tagText = (html: string, tag: string): string[] =>
-  [...html.matchAll(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, 'g'))].map(
-    (match) => textOf(match[1] ?? ''),
-  );
+  [
+    ...html
+      .replace(/<template[\s\S]*?<\/template>/g, '')
+      .matchAll(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, 'g')),
+  ].map((match) => textOf(match[1] ?? ''));

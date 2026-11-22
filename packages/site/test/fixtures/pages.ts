@@ -1,4 +1,4 @@
-export const contentPages = ['en/index.html'] as const;
+export const contentPages = ['en/index.html', 'en/play/index.html'] as const;
 export const sourceFolders = [
   'src/pages',
   'src/layouts',

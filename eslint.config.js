@@ -24,7 +24,9 @@ export default defineConfig(
   },
   {
     files: ['**/*.mjs'],
-    languageOptions: { globals: { process: 'readonly' } },
+    languageOptions: {
+      globals: { process: 'readonly', URL: 'readonly', console: 'readonly' },
+    },
   },
   {
     files: ['packages/engine/src/**/*.ts'],

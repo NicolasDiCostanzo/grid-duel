@@ -1,0 +1,15 @@
+---
+import SoloGame from '../../components/SoloGame.vue';
+import Layout from '../../layouts/Layout.astro';
+import { t } from '../../i18n';
+---
+
+<Layout title={t('play.title')} description={t('play.description')}>
+  <SoloGame client:only="vue">
+    <div slot="fallback">
+      <h1>{t('game.product.name')}</h1>
+      <p>{t('play.loading')}</p>
+      <noscript><p>{t('play.noscript')}</p></noscript>
+    </div>
+  </SoloGame>
+</Layout>

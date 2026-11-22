@@ -38,9 +38,10 @@ describe.each(contentPages)('the shared layout of %s', (page) => {
     expect(footer).toContain(t('footer.nonAffiliation'));
   });
 
-  it('has a header that links to the home page', () => {
+  it('has a header that links to the home page and to the game', () => {
     const [header] = html.match(/<header[\s\S]*?<\/header>/) ?? [''];
     expect(header).toContain('href="/en/"');
+    expect(header).toContain('href="/en/play/"');
   });
 
   it('takes its design tokens from the game', () => {
@@ -52,6 +53,31 @@ describe.each(contentPages)('the shared layout of %s', (page) => {
     ].join('\n');
     expect(css).toContain('--color-bg');
     expect(css).toContain('prefers-color-scheme:dark');
+  });
+});
+
+describe('the game page', () => {
+  const html = readBuilt('en/play/index.html');
+
+  it('embeds the game as a client-only Vue island', () => {
+    expect(html).toContain('<astro-island');
+    expect(html).toMatch(/client="only"/);
+    expect(html).toMatch(/renderer-url=/);
+  });
+
+  it('has one landmark and one h1 before any JavaScript runs', () => {
+    expect(tagText(html, 'main')).toHaveLength(1);
+    expect(tagText(html, 'h1')).toEqual([game.product.name]);
+  });
+
+  it('tells a visitor without JavaScript that the game needs it', () => {
+    expect(tagText(html, 'noscript').join(' ')).toContain(t('play.noscript'));
+  });
+
+  it('ships the bot worker so the hard bot stays off the main thread', () => {
+    expect(builtFiles().some((file) => /bot\.worker.*\.js$/.test(file))).toBe(
+      true,
+    );
   });
 });
 

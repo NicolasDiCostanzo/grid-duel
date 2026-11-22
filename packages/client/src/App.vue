@@ -32,7 +32,7 @@ const playAgain = () => start(settings.value as Settings);
 </script>
 
 <template>
-  <main class="app">
+  <div class="app">
     <h1 v-if="phase !== 'over'" class="app__title">
       {{ t('product.name') }}
     </h1>
@@ -58,7 +58,7 @@ const playAgain = () => start(settings.value as Settings);
       :thinking="thinking"
       @play="play"
     />
-  </main>
+  </div>
 </template>
 
 <style scoped>
