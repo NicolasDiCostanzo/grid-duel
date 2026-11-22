@@ -15,6 +15,14 @@ export default defineConfig({
         },
       },
       {
+        test: {
+          name: 'site',
+          include: ['packages/site/src/**/*.test.ts'],
+          globalSetup: ['packages/site/test/build.ts'],
+          testTimeout: 30_000,
+        },
+      },
+      {
         plugins: [vue()],
         test: {
           name: 'client',

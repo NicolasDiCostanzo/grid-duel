@@ -4,7 +4,7 @@ import tseslint from 'typescript-eslint';
 import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig(
-  globalIgnores(['**/dist/**', '**/coverage/**', 'docs/**']),
+  globalIgnores(['**/dist/**', '**/coverage/**', '**/.astro/**', 'docs/**']),
   js.configs.recommended,
   tseslint.configs.recommended,
   pluginVue.configs['flat/recommended'],
@@ -21,6 +21,10 @@ export default defineConfig(
       'vue/singleline-html-element-content-newline': 'off',
       'vue/multiline-html-element-content-newline': 'off',
     },
+  },
+  {
+    files: ['**/*.mjs'],
+    languageOptions: { globals: { process: 'readonly' } },
   },
   {
     files: ['packages/engine/src/**/*.ts'],
