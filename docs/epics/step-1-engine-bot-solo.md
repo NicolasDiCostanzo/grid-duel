@@ -251,7 +251,7 @@ A hard bot that plays as well as the visible information allows, taking effects 
 
 ### Rule decisions and measures
 - Algorithm: sampled search (README, "Hard bot"). The engine exports `sampleRound(view, move, source)`, which deals the unseen cards at random, plays the rest of the round randomly and resolves it with the real engine. `GameView` gains `firstPlayer` (public, needed for the resolution order).
-- The budget is a rollout count, not a duration, so the bot stays deterministic. Default 800 rollouts, worst move about 100 ms (2x2) and 120 ms (2x3) here; a phone cannot be measured from this machine.
+- The budget is a rollout count, not a duration, so the bot stays deterministic. `rollouts` (default 800) is a total split evenly between the legal moves, rounded down, with 1 to 200 rollouts per move (`rolloutsPerMove`); so 3 legal moves get 200 each, 600 in all, and more legal moves than rollouts get 1 each. The worst move takes about 100 ms (2x2) and 120 ms (2x3) here; a phone cannot be measured from this machine.
 - Threshold: hard beats medium in at least 75% of 60 seeded games per board size with a budget of 200 rollouts (measured 86.7% on 2x2, 91.7% on 2x3). With the default budget: 93.3% and 90.0% over 60 games; 100% against easy over 40 games.
 - As for 1.7, the view restriction is carried by the bot's type (`GameView` only) and tested in the engine (1.6), not again in the bot package.
 
