@@ -1,4 +1,4 @@
-export { compareTypes, getPiece } from './catalog';
+export { catalog, compareTypes, getPiece } from './catalog';
 export type { Outcome, Piece } from './catalog';
 export { createRng } from './rng';
 export type { Rng } from './rng';

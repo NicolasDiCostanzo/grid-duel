@@ -156,6 +156,7 @@ export const publicExports = [
   'GameError',
   'PlacementError',
   'applyMove',
+  'catalog',
   'compareTypes',
   'createGame',
   'createRng',

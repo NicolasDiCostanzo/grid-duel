@@ -282,6 +282,25 @@ Depends on: 1.8 (all bots). Present a plan for this epic and wait for validation
 - Output as readable Markdown plus machine-readable JSON, written to a folder that is not committed or to docs/ (decide in the plan).
 - The tool exits with an error if the ordering hard > medium > easy does not hold.
 
+### Rule decisions and measures
+- Output: `reports/balance-report.md` and `.json`, not committed (`reports/` is ignored). The first report is kept as a baseline in `docs/reports/balance-baseline.md`.
+- The ordering check passes when every stronger level wins more than half of its games against each weaker level that was played. The command exits with 1 when it does not hold and with 2 on a usage error.
+- The first player advantage, the blessing impact and the draw rate come from games of one analysis level against itself (`easy` by default, 3000 games for the baseline), because random play places each blessing approximately independently of the situation. The luck of the offers and the draws is reported as the share of matches the weaker level still wins, and the share of drawn rounds.
+- `tsx` (MIT, development only) runs the command line, because Node 24 does not resolve the extensionless imports of the workspace packages.
+
+### First report (baseline, seed 1, 100 games per pairing, default hard bot)
+Kept in `docs/reports/balance-baseline.md`, generated after the medium bot's Scout fix.
+- Ordering holds on both boards: hard over medium 90% (2x2) and 96% (2x3), medium over easy 67% and 68%, hard over easy 97% and 100%.
+- Leads for the rules owner, none of them acted on (RULES.md is unchanged):
+  1. False: +18.0 points of round score on 2x2 and +12.9 on 2x3 for a player who placed it. This depends on the reading that the winner of the duel gets no point when a False loses (RULES.md, "Duel points"); under the other reading the winner would still score.
+  2. Lone, Wandering, Guardian and Rotten+ score between -6.6 and -18.6 points for a random player. This mostly reflects that a Shepherd loses to every regular piece by type; their effects do not make up for it under random play. A hard-bot analysis (`--analysis-level hard`) would tell whether skilled play can use them.
+  3. Prize: +6.4 points on 2x2 (flagged) and +4.3 on 2x3, consistent with its design.
+  4. First player: the first player wins 48.2% of the decided rounds on 2x2 (95% interval 47.0% to 49.5%) and 48.8% on 2x3, a small edge for the second player.
+  5. Drawn rounds: 16.3% (2x2) and 14.7% (2x3).
+
+### Delivered interface (used by 1.10 and later)
+`npm run simulate -- [options]` (README, "Simulation and balance report"). `packages/simulate/src/index.ts` exports `simulate`, `playGame`, `runPairing`, `seedsFor` and the statistics (`wilsonInterval`, `checkOrdering`, `firstPlayerAdvantage`, `effectImpact`). The engine exports its piece `catalog`.
+
 ### Done when
 Tests cover the statistics code on small fixed seeds and the ordering check; a first report is produced and any balance finding that suggests a rule interpretation change is listed for the user (RULES.md is not changed without asking). `npm test` passes.
 

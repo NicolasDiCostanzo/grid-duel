@@ -15,7 +15,7 @@ Requires Node 24 (see `.nvmrc`) and npm.
 | `npm run lint`     | ESLint, then the TypeScript type check of every package |
 | `npm run format`   | Format the repository with Prettier                     |
 | `npm run dev`      | Not wired yet (epic 1.10, client)                       |
-| `npm run simulate` | Not wired yet (epic 1.9, simulation tool)               |
+| `npm run simulate` | Play seeded bot games and write the balance report      |
 | `npm run deploy`   | Not wired yet (epic 1.13, deployment)                   |
 
 Continuous integration (`.github/workflows/ci.yml`) runs the format check, lint and tests on every pull request and on every push to `main`.
@@ -25,6 +25,25 @@ Git hooks live in `.githooks/` and `npm install` enables them: `pre-commit` chec
 ## Packages
 
 `packages/engine`, `packages/bot`, `packages/simulate` and `packages/client`, named under the neutral scope `@game` (they are private and not published). `engine` and `bot` hold code; `simulate` and `client` are empty shells for now.
+
+## Simulation and balance report
+
+`npm run simulate -- [options]` plays seeded games between the bot levels and writes `reports/balance-report.md` and `reports/balance-report.json` (the `reports/` folder is not committed; a baseline report is kept in `docs/reports/`). Run it before any rules or balance change ships. It exits with 1 if the ordering hard > medium > easy does not hold and with 2 on a usage error. The same seed gives the same report.
+
+| Option                   | Default                | Meaning                                                               |
+| ------------------------ | ---------------------- | --------------------------------------------------------------------- |
+| `--games N`              | 100                    | Games per pairing of two levels (seats alternate, same deals)         |
+| `--analysis-games N`     | 1000                   | Games of the analysis level against itself, for the two tables below  |
+| `--levels a,b`           | `easy,medium,hard`     | Levels to pair (at least two different ones)                          |
+| `--board 2x2\|2x3\|both` | `both`                 | Board size                                                            |
+| `--seed N`               | 1                      | Seed of every deal and of the bots (positive integer, at most 2^53-1) |
+| `--analysis-level LEVEL` | `easy`                 | Level used for the first player and blessing analysis                 |
+| `--hard-rollouts N`      | the hard bot's default | Rollout budget of the hard bot (lower it for a quick run)             |
+| `--out DIR`              | `reports`              | Output folder                                                         |
+
+The report has, per board size: the win rate of each stronger level over each weaker one with a 95% Wilson interval; the first player advantage (share of decided rounds won by the player who goes first, in games of the analysis level against itself); the impact of each blessing (the round score of a player who placed a piece with the blessing against the other rounds, with a standard error; a difference is flagged when it is at least 5 points and more than two standard errors); the luck of the offers and the draws (how often the weaker level still wins the match, and the share of drawn rounds); and a list of findings for the rules owner. The analysis uses the easy level by default because random play places each blessing approximately independently of the situation (a forced Scout or a Lone-limited offer are the exceptions), so the comparison is not biased by smart choices. A finding is a lead for the rules owner, never a rule change: `RULES.md` is changed only on the owner's decision.
+
+`tsx` (MIT, development only) runs the command line, because Node 24 strips types but does not resolve the extensionless imports of the workspace packages.
 
 ## Bots
 
