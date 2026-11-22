@@ -11,15 +11,16 @@
   ],
   "scripts": {
     "dev": "npm run dev -w @game/client --",
+    "build": "npm run build -w @game/site",
     "test": "vitest run",
+    "test:e2e": "npm run test:e2e --workspaces --if-present",
     "simulate": "npm run simulate -w @game/simulate --",
     "deploy": "node -e \"console.error('deploy is not wired yet (epic 1.13)'); process.exit(1)\"",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint . && npm run typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "sh scripts/setup-hooks.sh",
-    "test:e2e": "npm run test:e2e -w @game/client --"
+    "prepare": "sh scripts/setup-hooks.sh"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

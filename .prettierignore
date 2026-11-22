@@ -1,3 +1,4 @@
 docs
 .vscode
 package-lock.json
+.astro

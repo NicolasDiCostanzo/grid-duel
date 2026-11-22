@@ -1,0 +1,25 @@
+{
+  "name": "@game/site",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "typecheck": "astro check",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@playwright/test": "^1.65.1",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "@astrojs/vue": "^7.1.6",
+    "@game/client": "*",
+    "astro": "^7.4.13",
+    "vue": "^3.5.46"
+  }
+}

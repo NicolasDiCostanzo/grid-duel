@@ -15,6 +15,7 @@ Requires Node 24 (see `.nvmrc`) and npm.
 | `npm run lint`     | ESLint, then the TypeScript type check of every package |
 | `npm run format`   | Format the repository with Prettier                     |
 | `npm run dev`      | Start the client with the Vite dev server               |
+| `npm run build`    | Build the static site (home page and the game)          |
 | `npm run test:e2e` | Play whole solo matches in Chrome with Playwright       |
 | `npm run simulate` | Play seeded bot games and write the balance report      |
 | `npm run deploy`   | Not wired yet (epic 1.13, deployment)                   |
@@ -25,7 +26,7 @@ Git hooks live in `.githooks/` and `npm install` enables them: `pre-commit` chec
 
 ## Packages
 
-`packages/engine`, `packages/bot`, `packages/simulate` and `packages/client`, named under the neutral scope `@game` (they are private and not published). `engine` is the rules, `bot` the three bot levels, `simulate` the balance report and `client` the web app.
+`packages/engine`, `packages/bot`, `packages/simulate` and `packages/client`, named under the neutral scope `@game` (they are private and not published). `engine` is the rules, `bot` the three bot levels, `simulate` the balance report, `client` the game app and `site` the Astro site that serves the pages and embeds the game.
 
 ## Client
 
@@ -40,6 +41,17 @@ Choices and why:
 - **Type check and lint:** `vue-tsc` checks the `.vue` files and `eslint-plugin-vue` lints them (its layout rules are off, Prettier formats).
 
 Not in this epic: labels that explain each effect, animations and sound (1.11), the reskin test (1.12), deployment (1.13). The 360 px layout was checked in Chrome with a viewport of that width; no real phone was available.
+
+## Site
+
+`packages/site` is an Astro 7 site (static HTML, no adapter) with the Vue integration. `npm run build` writes it to `packages/site/dist`; `npm run dev -w @game/site` serves it while you work.
+
+- **Pages** live in one folder per locale, `src/pages/en/` for now, and `/` redirects to `/en/`. A header and a footer are shared by every page, and the footer carries the non-affiliation line.
+- **Text:** the product name and every game name come from the game's translation file (`packages/client/src/i18n/en.ts`); the site's own text is in `packages/site/src/i18n/en.ts`. A test fails if a page, layout or component hard-codes the product name or the footer line. The layout imports the game's design tokens.
+- **The game** is a client-only Vue island on `/en/play/` (`src/components/SoloGame.vue`). `src/vue-app.ts` installs `vue-i18n` on it. The island needs JavaScript; the page says so in a `<noscript>` and keeps its heading in the HTML. The host page owns the `<main>` landmark, so the game's root is a `div`.
+- **Tests:** Vitest builds the site once (`test/build.ts`) and checks the built HTML, for example that the home page text is in the HTML without running JavaScript. `npm run test:e2e` also plays a whole match from the site's home page, served from `dist/` by a 40-line static server (`e2e/serve.mjs`): under Playwright, `astro preview` detaches into the background and Playwright takes it for a crash.
+- `SITE_URL` sets the site address used for canonical URLs (default `http://localhost:4321`). Astro sends anonymous usage data unless `ASTRO_TELEMETRY_DISABLED=1` is set or `astro telemetry disable` was run; the test build sets it.
+- Deployment is not wired yet (epic 1.13): the site builds, and publishing it is part of that epic.
 
 ## Simulation and balance report
 
