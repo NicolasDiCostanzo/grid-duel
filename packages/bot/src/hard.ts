@@ -19,16 +19,19 @@ const valueFor = (outcome: SampledRound, player: 0 | 1): number => {
   return outcome.winner === player ? 1 : 0;
 };
 
+export const rolloutsPerMove = (rollouts: number, legalMoves: number): number =>
+  Math.min(
+    MAX_ROLLOUTS_PER_MOVE,
+    Math.max(1, Math.floor(rollouts / legalMoves)),
+  );
+
 export function createHardBot(options: { rollouts: number }): Bot {
   return (view, rng) => {
     const { moves } = view;
     if (moves.length <= 1) {
       return pickMove(moves, rng);
     }
-    const perMove = Math.min(
-      MAX_ROLLOUTS_PER_MOVE,
-      Math.max(1, Math.floor(options.rollouts / moves.length)),
-    );
+    const perMove = rolloutsPerMove(options.rollouts, moves.length);
     const seeds = Array.from({ length: perMove }, () => seedFrom(rng));
     const scored = moves.map((move) => ({
       move,
