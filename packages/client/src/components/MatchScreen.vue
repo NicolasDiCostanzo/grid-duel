@@ -18,6 +18,7 @@ const emit = defineEmits<{ play: [move: Move] }>();
 const { t } = useI18n();
 
 const chosen = shallowRef<string | null>(null);
+const hoveredDuel = shallowRef<number | null>(null);
 
 const offer = computed(() => view.offer ?? []);
 const selected = computed(() =>
@@ -67,22 +68,30 @@ function choose(cell: Cell): void {
   <div class="match">
     <ScoreBar :round="view.results.length + 1" :wins="wins" />
     <p class="match__status" aria-live="polite">{{ status }}</p>
-    <BoardGrid
-      :board-size="view.boardSize"
-      :cells="view.boards[opponentSide]"
-      owner="theirs"
-      :legal-cells="targets.opponent"
-      :title="t('match.opponentBoard')"
-      @choose="choose"
-    />
-    <BoardGrid
-      :board-size="view.boardSize"
-      :cells="view.boards[view.player]"
-      owner="mine"
-      :legal-cells="targets.own"
-      :title="t('match.yourBoard')"
-      @choose="choose"
-    />
+    <div class="match__boards">
+      <BoardGrid
+        :board-size="view.boardSize"
+        :cells="view.boards[view.player]"
+        owner="mine"
+        :legal-cells="targets.own"
+        :title="t('match.yourBoard')"
+        :highlighted-duel="hoveredDuel"
+        @choose="choose"
+        @hover="hoveredDuel = $event"
+      />
+      <BoardGrid
+        :board-size="view.boardSize"
+        :cells="view.boards[opponentSide]"
+        owner="theirs"
+        :legal-cells="targets.opponent"
+        :title="t('match.opponentBoard')"
+        mirrored
+        :highlighted-duel="hoveredDuel"
+        @choose="choose"
+        @hover="hoveredDuel = $event"
+      />
+    </div>
+    <p class="match__hint">{{ t('match.duelHint') }}</p>
     <OfferTray
       :pieces="offer"
       :selected="selected"
@@ -96,6 +105,18 @@ function choose(cell: Cell): void {
 .match {
   display: grid;
   gap: var(--space-4);
+}
+
+.match__boards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.match__hint {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--font-size-small);
 }
 
 .match__status {

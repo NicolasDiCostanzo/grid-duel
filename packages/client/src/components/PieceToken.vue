@@ -64,20 +64,20 @@ const shapeStyle = computed(() => ({
 }
 
 .piece__shape {
-  inline-size: 2rem;
-  block-size: 2rem;
+  inline-size: var(--piece-shape-size, 2rem);
+  block-size: var(--piece-shape-size, 2rem);
   background-color: var(--piece-color);
   mask: var(--piece-shape) center / contain no-repeat;
   -webkit-mask: var(--piece-shape) center / contain no-repeat;
 }
 
 .piece__name {
-  font-size: var(--font-size-small);
-  overflow-wrap: anywhere;
+  font-size: var(--piece-name-size, var(--font-size-small));
+  overflow-wrap: break-word;
 }
 
 .piece__note {
-  font-size: var(--font-size-small);
+  font-size: var(--piece-name-size, var(--font-size-small));
   color: var(--color-muted);
 }
 </style>

@@ -7,10 +7,10 @@ const cell = { column: 1, row: 0 } as const;
 describe('BoardCell', () => {
   it('describes an empty square for a screen reader', () => {
     const wrapper = mountWithI18n(BoardCell, {
-      props: { cell, piece: null, owner: 'mine', legal: false },
+      props: { cell, duel: 1, piece: null, owner: 'mine', legal: false },
     });
     expect(wrapper.attributes('aria-label')).toBe(
-      'Empty square, column 2, row 1',
+      'Empty square, column 2, row 1, duel 1',
     );
     expect(wrapper.element.tagName).toBe('DIV');
   });
@@ -19,20 +19,21 @@ describe('BoardCell', () => {
     const wrapper = mountWithI18n(BoardCell, {
       props: {
         cell,
+        duel: 1,
         piece: { pieceId: 'r1', nullified: false },
         owner: 'theirs',
         legal: false,
       },
     });
     expect(wrapper.attributes('aria-label')).toBe(
-      "Paper, opponent's, column 2, row 1",
+      "Paper, opponent's, column 2, row 1, duel 1",
     );
     expect(wrapper.text()).toContain('Paper');
   });
 
   it('is a button that asks to be chosen when it is a legal target', async () => {
     const wrapper = mountWithI18n(BoardCell, {
-      props: { cell, piece: null, owner: 'mine', legal: true },
+      props: { cell, duel: 1, piece: null, owner: 'mine', legal: true },
     });
     expect(wrapper.element.tagName).toBe('BUTTON');
     await wrapper.trigger('click');
@@ -41,7 +42,7 @@ describe('BoardCell', () => {
 
   it('does not emit when it is not a legal target', async () => {
     const wrapper = mountWithI18n(BoardCell, {
-      props: { cell, piece: null, owner: 'mine', legal: false },
+      props: { cell, duel: 1, piece: null, owner: 'mine', legal: false },
     });
     await wrapper.trigger('click');
     expect(wrapper.emitted('choose')).toBeUndefined();
@@ -49,8 +50,42 @@ describe('BoardCell', () => {
 
   it('shows that a legal square is highlighted', () => {
     const wrapper = mountWithI18n(BoardCell, {
-      props: { cell, piece: null, owner: 'mine', legal: true },
+      props: { cell, duel: 1, piece: null, owner: 'mine', legal: true },
     });
     expect(wrapper.classes()).toContain('cell--legal');
+  });
+
+  it('shows the number of its duel, which the facing square shares', () => {
+    const wrapper = mountWithI18n(BoardCell, {
+      props: { cell, duel: 3, piece: null, owner: 'mine', legal: false },
+    });
+    expect(wrapper.get('.cell__duel').text()).toBe('3');
+  });
+
+  it('can be highlighted as one half of a duel', () => {
+    const wrapper = mountWithI18n(BoardCell, {
+      props: {
+        cell,
+        duel: 1,
+        piece: null,
+        owner: 'mine',
+        legal: false,
+        highlighted: true,
+      },
+    });
+    expect(wrapper.classes()).toContain('cell--highlighted');
+  });
+
+  it.each([
+    ['pointerenter', true],
+    ['pointerleave', false],
+    ['focus', true],
+    ['blur', false],
+  ])('reports %s so the facing square can be shown', async (event, active) => {
+    const wrapper = mountWithI18n(BoardCell, {
+      props: { cell, duel: 1, piece: null, owner: 'mine', legal: true },
+    });
+    await wrapper.trigger(event);
+    expect(wrapper.emitted('hover')).toEqual([[active]]);
   });
 });

@@ -22,7 +22,7 @@ describe('MatchScreen', () => {
     expect(wrapper.text()).toContain('Round 2');
     expect(wrapper.text()).toContain('Rounds won: you 1, opponent 0');
     const titles = wrapper.findAll('h2').map((title) => title.text());
-    expect(titles).toEqual(["Opponent's board", 'Your board', 'Your pieces']);
+    expect(titles).toEqual(['Your board', "Opponent's board", 'Your pieces']);
     expect(wrapper.findAll('.offer__piece')).toHaveLength(3);
   });
 
@@ -43,8 +43,8 @@ describe('MatchScreen', () => {
     expect(legal).toHaveLength(3);
     expect(wrapper.text()).toContain('Choose a square for Rock.');
     const boards = wrapper.findAll('section.board');
-    expect(boards[0]?.findAll('.cell--legal')).toHaveLength(0);
-    expect(boards[1]?.findAll('.cell--legal')).toHaveLength(3);
+    expect(boards[0]?.findAll('.cell--legal')).toHaveLength(3);
+    expect(boards[1]?.findAll('.cell--legal')).toHaveLength(0);
   });
 
   it('plays the chosen piece on the chosen square', async () => {
@@ -71,9 +71,9 @@ describe('MatchScreen', () => {
     });
     await wrapper.findAll('.offer__piece')[0]?.trigger('click');
     const boards = wrapper.findAll('section.board');
-    expect(boards[0]?.findAll('.cell--legal')).toHaveLength(1);
-    expect(boards[1]?.findAll('.cell--legal')).toHaveLength(0);
-    await boards[0]?.get('button.cell--legal').trigger('click');
+    expect(boards[0]?.findAll('.cell--legal')).toHaveLength(0);
+    expect(boards[1]?.findAll('.cell--legal')).toHaveLength(1);
+    await boards[1]?.get('button.cell--legal').trigger('click');
     expect(wrapper.emitted('play')).toEqual([
       [{ pieceId: 'r0.replace', cell: { column: 0, row: 1 } }],
     ]);
@@ -89,5 +89,42 @@ describe('MatchScreen', () => {
 
   it('announces the status to a screen reader', () => {
     expect(mountMatch().find('[aria-live="polite"]').exists()).toBe(true);
+  });
+
+  it('puts the two boards side by side', () => {
+    const wrapper = mountMatch();
+    const row = wrapper.get('.match__boards');
+    expect(row.findAll('section.board')).toHaveLength(2);
+  });
+
+  it('numbers the duels on both boards, the opponent board mirrored', () => {
+    const wrapper = mountMatch();
+    const [mine, theirs] = wrapper
+      .findAll('section.board')
+      .map((board) =>
+        board.findAll('.cell__duel').map((n) => Number(n.text())),
+      );
+    expect(mine).toEqual([3, 1, 4, 2]);
+    expect(theirs).toEqual([1, 3, 2, 4]);
+  });
+
+  it('explains the numbers', () => {
+    expect(mountMatch().text()).toContain(
+      'Squares with the same number duel each other.',
+    );
+  });
+
+  it('highlights the square that faces the one under the pointer', async () => {
+    const wrapper = mountMatch();
+    const own = wrapper.findAll('section.board')[0];
+    await own?.findAll('.cell')[1]?.trigger('pointerenter');
+    const lit = wrapper.findAll('.cell--highlighted');
+    expect(lit).toHaveLength(2);
+    expect(lit.map((cell) => cell.get('.cell__duel').text())).toEqual([
+      '1',
+      '1',
+    ]);
+    await own?.findAll('.cell')[1]?.trigger('pointerleave');
+    expect(wrapper.findAll('.cell--highlighted')).toHaveLength(0);
   });
 });
