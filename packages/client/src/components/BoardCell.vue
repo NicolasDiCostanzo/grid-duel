@@ -19,13 +19,17 @@ const { t } = useI18n();
 
 const label = computed(() => {
   const place = { column: cell.column + 1, row: cell.row + 1, duel };
-  return piece === null
-    ? t('cell.empty', place)
-    : t('cell.occupied', {
-        ...place,
-        piece: pieceLabel(t, piece.pieceId),
-        owner: t(owner === 'mine' ? 'cell.mine' : 'cell.theirs'),
-      });
+  const base =
+    piece === null
+      ? t('cell.empty', place)
+      : t('cell.occupied', {
+          ...place,
+          piece: pieceLabel(t, piece.pieceId),
+          owner: t(owner === 'mine' ? 'cell.mine' : 'cell.theirs'),
+        });
+  return piece === null || !piece.nullified
+    ? base
+    : `${base}, ${t('piece.nullified')}`;
 });
 </script>
 

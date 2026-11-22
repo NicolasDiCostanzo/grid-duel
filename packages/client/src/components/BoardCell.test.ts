@@ -31,6 +31,21 @@ describe('BoardCell', () => {
     expect(wrapper.text()).toContain('Paper');
   });
 
+  it('appends the cancelled blessing when the piece is nullified', () => {
+    const wrapper = mountWithI18n(BoardCell, {
+      props: {
+        cell,
+        duel: 1,
+        piece: { pieceId: 'r1', nullified: true },
+        owner: 'theirs',
+        legal: false,
+      },
+    });
+    expect(wrapper.attributes('aria-label')).toBe(
+      "Paper, opponent's, column 2, row 1, duel 1, blessing cancelled",
+    );
+  });
+
   it('is a button that asks to be chosen when it is a legal target', async () => {
     const wrapper = mountWithI18n(BoardCell, {
       props: { cell, duel: 1, piece: null, owner: 'mine', legal: true },
