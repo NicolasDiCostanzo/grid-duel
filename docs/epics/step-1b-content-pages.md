@@ -22,6 +22,17 @@ An Astro site that serves real HTML pages and embeds the existing Vue game, with
 - `npm run build` outputs static HTML. A test checks that the built home page contains its main text without running JavaScript.
 - The existing deployment (step 1, epic 1.13) publishes the site.
 
+### Rule decisions and measures
+- Astro 7.4 (`astro`, `@astrojs/vue`, `@astrojs/check`; MIT), static output, `redirects: { '/': '/en/' }` for the root (a static redirect page: a client-side `meta refresh`, no status code).
+- Package: `packages/site` (`@game/site`). Pages in `src/pages/en/`; layout in `src/layouts/Layout.astro`; the game is `src/components/SoloGame.vue` as a `client:only="vue"` island with `src/vue-app.ts` as the `appEntrypoint` (installs `vue-i18n`).
+- The game's root element is now a `div`: the host page (the site, or the client's own `index.html`) owns the `main` landmark, so the island does not nest a second one.
+- Shared with the game: design tokens and base CSS (imported from `@game/client`), the translation file (product and piece names). The site's own text is in `packages/site/src/i18n/en.ts`.
+- Not done, because step 1 is not complete: the existing deployment (1.13) does not exist yet, so nothing publishes the site. `npm run build` outputs the static site.
+- Verified: Vitest builds the site and checks the built HTML (text without JavaScript, layout, tokens, locale folders, redirect, island, single landmark and h1, the bot worker in the build), and Playwright plays a whole match from the home page at 360 px and 1280 px.
+
+### Delivered interface (used by 1b.2 and later)
+`npm run build` (root) builds `packages/site/dist`. `t(key)` in `packages/site/src/i18n/index.ts` reads the site messages and the game's under `game.`. `Layout.astro` takes `title` and `description`. Test helpers in `packages/site/test/built.ts` (`readBuilt`, `builtFiles`, `tagText`, `textOf`) read the built pages; a Vitest global setup builds them once.
+
 ### Done when
 The site builds, the embedded game plays, the built HTML is readable without JavaScript, and `npm test` passes.
 
