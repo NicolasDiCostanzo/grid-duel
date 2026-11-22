@@ -105,6 +105,7 @@ export const publicViewKeys = [
   'boards',
   'currentPlayer',
   'deck',
+  'firstPlayer',
   'offer',
   'phase',
   'player',

@@ -163,5 +163,6 @@ export const publicExports = [
   'legalMoves',
   'recordOf',
   'replay',
+  'sampleRound',
   'view',
 ];

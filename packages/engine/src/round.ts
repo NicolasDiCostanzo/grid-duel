@@ -28,6 +28,7 @@ export type PlayerView = {
   boards: readonly [Board, Board];
   currentPlayer: PlayerId | null;
   deck: Deck;
+  firstPlayer: PlayerId;
   offer: readonly string[] | null;
   phase: RoundPhase;
   player: PlayerId;
@@ -251,6 +252,7 @@ export function playerView(state: RoundState, player: PlayerId): PlayerView {
     boards: state.boards,
     currentPlayer: state.currentPlayer,
     deck: state.decks[player].toSorted(),
+    firstPlayer: state.firstPlayer,
     offer: state.currentPlayer === player ? state.offer : null,
     phase: state.phase,
     player,

@@ -20,6 +20,8 @@ export type {
   RecordedMove,
 } from './game';
 export type { RoundResult } from './match';
+export { sampleRound } from './sample';
+export type { SampledRound } from './sample';
 export { PlacementError } from './round';
 export type {
   BoardSize,

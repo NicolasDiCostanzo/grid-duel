@@ -22,10 +22,15 @@ const firstView = (seed: number): GameView => {
   return view(game, game.round.currentPlayer as PlayerId);
 };
 
-export function describeBotContract(name: string, bot: Bot): void {
+export function describeBotContract(
+  name: string,
+  bot: Bot,
+  options: { seeds?: readonly number[] } = {},
+): void {
+  const seeds = options.seeds ?? gameSeeds;
   describe(`${name} bot contract`, () => {
     const cases = boardSizes.flatMap((boardSize) =>
-      gameSeeds.map((seed) => ({ boardSize, seed })),
+      seeds.map((seed) => ({ boardSize, seed })),
     );
 
     it.each(cases)(
@@ -43,15 +48,10 @@ export function describeBotContract(name: string, bot: Bot): void {
       },
     );
 
-    it.each(gameSeeds)(
-      'is deterministic for a view and a seed (%i)',
-      (seed) => {
-        const input = firstView(seed);
-        expect(bot(input, createRng(SEED))).toEqual(
-          bot(input, createRng(SEED)),
-        );
-      },
-    );
+    it.each(seeds)('is deterministic for a view and a seed (%i)', (seed) => {
+      const input = firstView(seed);
+      expect(bot(input, createRng(SEED))).toEqual(bot(input, createRng(SEED)));
+    });
 
     it('throws when it is not the player turn', () => {
       const game = createGame({ seed: hexSeedFor(1), boardSize: '2x2' });
