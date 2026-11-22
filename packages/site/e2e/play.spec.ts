@@ -16,7 +16,13 @@ async function playUntilResult(page: Page): Promise<void> {
       await piece.click();
       await page.locator('button.cell').first().click();
     } else {
-      await page.waitForTimeout(100);
+      await expect(
+        page
+          .locator('.offer__piece:enabled')
+          .or(next)
+          .or(result)
+          .first(),
+      ).toBeVisible({ timeout: 30_000 });
     }
   }
   throw new Error('The match did not reach its result');
