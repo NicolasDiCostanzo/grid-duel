@@ -289,7 +289,8 @@ Depends on: 1.8 (all bots). Present a plan for this epic and wait for validation
 - `tsx` (MIT, development only) runs the command line, because Node 24 does not resolve the extensionless imports of the workspace packages.
 
 ### First report (baseline, seed 1, 100 games per pairing, default hard bot)
-- Ordering holds on both boards: hard over medium 88% (2x2) and 95% (2x3), medium over easy 69% and 72%, hard over easy 97% and 100%.
+Kept in `docs/reports/balance-baseline.md`, generated after the medium bot's Scout fix.
+- Ordering holds on both boards: hard over medium 90% (2x2) and 96% (2x3), medium over easy 67% and 68%, hard over easy 97% and 100%.
 - Leads for the rules owner, none of them acted on (RULES.md is unchanged):
   1. False: +18.0 points of round score on 2x2 and +12.9 on 2x3 for a player who placed it. This depends on the reading that the winner of the duel gets no point when a False loses (RULES.md, "Duel points"); under the other reading the winner would still score.
   2. Lone, Wandering, Guardian and Rotten+ score between -6.6 and -18.6 points for a random player. This mostly reflects that a Shepherd loses to every regular piece by type; their effects do not make up for it under random play. A hard-bot analysis (`--analysis-level hard`) would tell whether skilled play can use them.
